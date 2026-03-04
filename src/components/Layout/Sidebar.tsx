@@ -6,6 +6,7 @@ import { RecentActivityFeed } from '../UI/RecentActivityFeed';
 import { Changelog } from '../UI/Changelog';
 import { HowToModal } from '../Help/HowToModal';
 import { useAuth } from '../../context/AuthContext';
+import { ProfileModal } from '../Profile/ProfileModal';
 import type { View, Client } from '../../types';
 
 interface SidebarProps {
@@ -142,6 +143,7 @@ const statusColors: Record<Client['status'], string> = {
 export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed, onToggleCollapse }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const { clients } = useClientContext();
   const { pinnedViews } = useSavedViews();
   const [favorites] = useLocalStorage<string[]>('favorite-clients', []);
@@ -395,6 +397,7 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
 
       {/* User Avatar Chip */}
       {currentUser && (
+        <>
         <div ref={menuRef} className="relative px-2 pb-1">
           <button
             onClick={() => setUserMenuOpen(v => !v)}
@@ -416,7 +419,7 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
           {userMenuOpen && (
             <div className={`absolute bottom-full mb-1 ${isCollapsed ? 'left-12' : 'left-2 right-2'} bg-zinc-800 border-2 border-zinc-600 rounded-[4px] shadow-[3px_3px_0_0_#18181b] z-50`}>
               <button
-                onClick={() => setUserMenuOpen(false)}
+                onClick={() => { setUserMenuOpen(false); setProfileModalOpen(true); }}
                 className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
               >
                 👤 Profile
@@ -430,6 +433,8 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
             </div>
           )}
         </div>
+        <ProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
+        </>
       )}
 
       {/* Changelog & Collapse Toggle */}
