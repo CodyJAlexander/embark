@@ -180,7 +180,7 @@ export function Changelog({ isCollapsed = false }: ChangelogProps) {
         {!isCollapsed && <span className="font-medium text-sm">What's New</span>}
         {!isCollapsed && (
           <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-violet-500 to-purple-600 text-white">
-            v4.0
+            v5.0
           </span>
         )}
       </button>
