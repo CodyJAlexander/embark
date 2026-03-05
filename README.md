@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Tests](https://img.shields.io/badge/Tests-52_passing-22c55e?style=for-the-badge)](#)
-[![Version](https://img.shields.io/badge/Version-7.0-f59e0b?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-8.0-f59e0b?style=for-the-badge)](#)
 [![PWA](https://img.shields.io/badge/PWA-installable-a855f7?style=for-the-badge)](#)
 
 *Embark replaces the chaos of spreadsheets and scattered notes with a structured, gamified system that keeps every client onboarding on track — from first call to go-live.*
@@ -31,7 +31,49 @@ Most onboarding tools are either too simple (a checklist app) or too complex (an
 
 ---
 
-## 🆕 What's New in v7.0 — "Embark Unstoppable"
+## 🆕 What's New in v8.0 — "Embark Ascendant"
+
+Embark v8.0 is a full competitive upgrade — closing every gap against Rocketlane, Arrows.to, GUIDEcx, and ChurnZero with 14 new features across four tiers.
+
+### 🎨 White-Label Portal Branding
+Every client portal now reflects **your brand**. Upload a logo, set your accent color, company name, and tagline in Settings → Branding. Clients see your identity, not Embark's.
+
+### 🎬 Embedded Media in Portal Tasks
+Attach **Loom videos, YouTube tutorials, Calendly booking links, and Typeform surveys** directly inside checklist tasks. Clients see the embed inline in their portal — watch the walkthrough and complete the task in one place. URLs are auto-detected; Loom and YouTube share links are automatically converted to embed URLs.
+
+### ✍️ Approval / Sign-Off Tasks
+Mark any task as requiring client approval. Clients see **Approve / Request Changes** buttons in their portal. Approved tasks auto-complete; rejections capture a note. Pending approvals surface in Focus Mode with a count badge.
+
+### 📄 AI Status Reports
+One-click generation of a structured client update — **Executive Summary, Progress, What's Next, and Blockers** — using live client data. Copy to clipboard or send via email template. Last 5 reports per client are saved for reference.
+
+### 📞 AI Meeting Brief
+Before every call, click **Meeting Brief** for an instant pre-call intelligence brief — health snapshot, recent communications, open action items, AI-suggested talking points, and a suggested agenda. Auto-generates on open.
+
+### ✨ AI Onboarding Plan Generator
+Generate a complete onboarding plan from a prompt. Pick industry, complexity, and team size in the new client wizard and Embark builds phases, tasks, owners, and due dates. Preview, accept, or regenerate.
+
+### 📈 Predictive Intelligence
+- **Go-Live Forecast** — velocity-based prediction (tasks/day over 14 days) shown on every client card; "On-Time Forecast %" stat on the dashboard
+- **Engagement Score** — 0–100 score measuring portal recency, client task completion, comms frequency, and response speed; Engagement Watch leaderboard on the dashboard
+- **Churn Risk** — health history slope classified as Stable / Declining / High Risk; Churn Watch section on the dashboard
+- **NPS / CSAT** — shareable `/#survey/{id}` links; styled 0–10 scale survey; NPS Overview widget (promoters / passives / detractors) when 3+ clients have responded
+
+### 🔍 Smart Segments & Filter Builder
+Multi-condition **AND/OR filter builder** in the client list. Filter by health, status, priority, lifecycle stage, last contact, go-live proximity, MRR, and more. Three built-in quick segments: At Risk Renewals, Stalled Onboardings, High Value + Low Health. Save custom segments for reuse.
+
+### 📧 Email Sequence Automation
+New `send_email_sequence` automation action with a **per-step template + delay builder** and horizontal timeline visualizer. New `phase_completed` trigger fires sequences when a phase is advanced.
+
+### ⚖️ Team Capacity Planning
+New **Capacity tab** in Team Manager shows each member's active clients, open tasks, and a color-coded capacity bar (green / yellow / red). The member with the most headroom is flagged as Recommended. Configurable per-member capacity limits.
+
+### 🏆 Post-Onboarding Success Plan
+After graduation, create a **90-Day or Annual Success Plan** with Adoption, QBR, Expansion, and Renewal Prep tracks. Inline KPI editing (adoption %, MRR expansion, QBR status, NPS target). Prompted automatically after every graduation.
+
+---
+
+## 🔖 Previous: v7.0 — "Embark Unstoppable"
 
 ### 🗂️ Global Task Kanban Board
 A full **drag-and-drop task board** spanning every active client. Four columns — To Do, In Progress, Blocked, Done. Filter down to specific clients so the board stays focused instead of showing hundreds of cards. Click any card to open a slide-in drawer with subtasks, comments, and status controls. Every client also gets its own board tab in their detail view.
@@ -85,6 +127,9 @@ Level up, unlock **deeds** (achievements), and compete on the **🏆 Hall of Her
 - **AI Portfolio Brief** — portfolio-wide analysis surfacing at-risk clients with recommended plays
 - **Kickoff Pack Generator** — one-click AI draft of a client-facing kickoff email + internal team brief
 - **Smart Task Suggestions** — AI recommends checklist tasks based on services and go-live date
+- **AI Status Reports** — structured client update with Executive Summary, Progress, What's Next, and Blockers
+- **AI Meeting Brief** — pre-call intelligence brief with health, comms, action items, and suggested agenda
+- **AI Plan Generator** — generate a full phase + task plan from industry/complexity inputs in the new client wizard
 
 ### ⚙️ Automation Engine
 Build no-code automation rules: *"When priority changes to High → notify the team."* Triggers, conditions, and actions — all visual, no code required.
@@ -108,7 +153,7 @@ Generate a beautiful, **shareable two-way portal** for your clients. Clients can
 | ⚡ Build | Vite |
 | 🎨 Styling | Tailwind CSS v4 |
 | 💾 State | localStorage via custom hooks |
-| 🧪 Testing | Vitest — 52 tests passing (104 with worktree) |
+| 🧪 Testing | Vitest — 52 tests passing |
 | 📱 PWA | vite-plugin-pwa (installable, offline-capable) |
 | 🔍 Monitoring | Sentry (production only) |
 | 🚂 Deployment | Docker + nginx, Railway-ready |
@@ -142,18 +187,25 @@ Open [http://localhost:5173](http://localhost:5173), register an account, and th
 | 🔐 Auth | Per-user accounts with login/register; localStorage now, backend-ready |
 | 🧭 Onboarding Wizard | 5-step guided setup: profile → team → class → dashboard |
 | 📊 Build-A-Dash | 15 configurable widgets, layout saved per user |
-| 👥 Client List | Filter, sort, search, bulk actions, health badges |
+| 👥 Client List | Filter, sort, search, bulk actions, health badges, smart segments |
 | 🗂️ Task Kanban Board | Drag-and-drop board across all clients; filter to specific clients |
 | ✅ Tasks View | Cross-client task list with filters, due dates, assignees |
 | 📅 Planner | Calendar-based planner with daily planning mode |
-| ⚙️ Automations | No-code rule engine with triggers, conditions, and actions |
+| ⚙️ Automations | No-code rule engine; email sequence builder with timeline visualizer |
 | 📈 Reports | 10+ widgets: velocity trends, bottleneck heatmaps, phase duration |
 | 🏆 Hall of Heroes | Team leaderboard with XP, level, class, and deed badges |
 | 🔗 Integrations | Webhook delivery with retry logic and delivery logs |
-| 🤖 AI Center | Health Pulse, Risk Brief, Portfolio Brief, Kickoff Pack, Task Suggestions |
-| 🤝 Two-Way Portal | Clients check tasks, post updates, attach files from their portal URL |
+| 🤖 AI Center | Health Pulse, Risk Brief, Portfolio Brief, Status Reports, Meeting Brief, Plan Generator |
+| 🤝 Two-Way Portal | Clients check tasks, approve deliverables, embed media, post updates |
+| 🎨 White-Label Portal | Custom logo, accent color, company name, and tagline per workspace |
+| 🎬 Embedded Media | Loom, YouTube, Calendly, Typeform iframes inline in portal tasks |
+| ✍️ Approval Tasks | Client Approve / Request Changes workflow with Focus Mode alerts |
 | 📋 Intake Forms | Form builder with conditional logic; auto-creates clients on submit |
 | ⏱️ Time Tracking | Live timer, manual log, billable split, per-client report |
+| 📈 Predictive Intelligence | Go-live forecast, engagement score, churn risk, NPS collection |
+| 🔍 Smart Segments | Multi-condition AND/OR filter builder; save and reuse segments |
+| ⚖️ Capacity Planning | Per-member workload view with recommended assignee |
+| 🏆 Success Plans | 90-day and annual post-onboarding plans with KPI tracking |
 | 📱 PWA | Install to desktop, works offline |
 | 🌗 Dark Mode | Full dark/light theme support |
 | ⌨️ Command Palette | `Ctrl+K` global search and navigation |
@@ -181,8 +233,10 @@ See `.env.example` for all environment variables.
 
 - [ ] 🗄️ PostgreSQL backend (Railway) for real multi-user persistence
 - [ ] 🔒 RBAC — role-based permissions per team
-- [ ] 📧 Email notifications
+- [ ] 📧 Real email delivery (SMTP / SendGrid) — sequences fire for real
 - [ ] 📱 Native mobile app
+- [ ] 🔄 CRM bi-directional sync (Salesforce, HubSpot)
+- [ ] 💬 Real-time multi-user collaboration (WebSocket)
 
 ---
 

@@ -12,6 +12,27 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
+    version: '8.0.0',
+    date: 'March 5, 2026',
+    title: 'Embark Ascendant',
+    changes: [
+      { type: 'feature', description: 'White-Label Portal Branding — upload your logo, set your accent color, company name, and tagline in Settings → Branding; every client portal reflects your brand' },
+      { type: 'feature', description: 'Embedded Media in Portal Tasks — attach Loom videos, YouTube clips, Calendly booking links, and Typeform surveys directly inside tasks; clients see the embed inline and complete the task right there' },
+      { type: 'feature', description: 'Approval / Sign-Off Tasks — mark any task as requiring approval; clients see Approve / Request Changes buttons in their portal; pending approvals surface in Focus Mode with a count badge' },
+      { type: 'feature', description: 'AI Status Report Generator — one-click AI-generated status report per client with Executive Summary, Progress This Week, What\'s Next, and Blockers; copy to clipboard or send via email; last 5 reports saved per client' },
+      { type: 'feature', description: 'AI Meeting Brief — pre-call intelligence brief that auto-generates when you open it; includes health snapshot, recent communications, open action items, talking points, and a suggested agenda' },
+      { type: 'feature', description: 'AI Onboarding Plan Generator — generate a complete phase + task plan from a prompt in the new client wizard; choose industry, complexity, and team size; preview and accept or regenerate' },
+      { type: 'feature', description: 'Predictive Go-Live Date — velocity-based forecast (tasks/day over 14 days) shown as a chip on every client card; "On-Time Forecast %" stat on the dashboard' },
+      { type: 'feature', description: 'Client Engagement Score — 0–100 score measuring portal recency, client task completion, communication frequency, and response speed; shown in client detail; Engagement Watch on the dashboard' },
+      { type: 'feature', description: 'NPS / CSAT Collection — "Request NPS Survey" button generates a public /#survey/{id} URL; clients see a styled 0–10 scale and comment field; scores stored per client; NPS Overview widget on the dashboard' },
+      { type: 'feature', description: 'Predictive Churn Risk — health history slope classified as Stable / Declining / High Risk; chip on client cards; Churn Watch section on the dashboard' },
+      { type: 'feature', description: 'Smart Segments & Filter Builder — multi-condition AND/OR filter builder in the client list; quick presets for At Risk Renewals, Stalled Onboardings, and High Value Low Health; save custom segments' },
+      { type: 'feature', description: 'Email Sequence Automation — new send_email_sequence automation action with a per-step template + delay builder and horizontal timeline visualizer; new phase_completed trigger' },
+      { type: 'feature', description: 'Team Capacity Planning — Capacity tab in Team Manager shows per-member client load, open task count, capacity bar (green/yellow/red), and recommended assignee; configurable capacity limit per member' },
+      { type: 'feature', description: 'Post-Onboarding Success Plan — after graduation, create a 90-Day or Annual Success Plan with Adoption, QBR, Expansion, and Renewal Prep tracks; inline KPI editing; prompted automatically on graduation' },
+    ],
+  },
+  {
     version: '7.0.0',
     date: 'March 4, 2026',
     title: 'Embark Unstoppable',
@@ -225,7 +246,7 @@ export function Changelog({ isCollapsed = false }: ChangelogProps) {
         {!isCollapsed && <span className="font-medium text-sm">What's New</span>}
         {!isCollapsed && (
           <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-violet-500 to-purple-600 text-white">
-            v7.0
+            v8.0
           </span>
         )}
       </button>

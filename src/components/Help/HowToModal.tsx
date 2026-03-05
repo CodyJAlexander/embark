@@ -658,6 +658,386 @@ const articles: HowToArticle[] = [
     ),
   },
 
+  // ── Intelligence & AI ────────────────────────────────────────────────────
+  {
+    id: 'ai-status-report',
+    category: 'Intelligence & AI',
+    title: 'AI Status Reports',
+    icon: '📄',
+    summary: 'Generate client-ready status reports in one click',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          The AI Status Report generator creates a structured update for any client — covering progress, blockers, and next steps — in seconds. Open a client, click <strong>Status Report</strong> in the header, and the AI drafts a report using live client data.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">What's in a report</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-gray-900 dark:text-white">Executive Summary</span> — one-paragraph health snapshot</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Progress This Week</span> — recently completed tasks and milestones</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">What's Next</span> — the next 3 pending actions</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Blockers</span> — overdue or blocked items that need attention</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Sending the report</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Click <strong>Copy to Clipboard</strong> to paste into any email or message.</li>
+            <li>Click <strong>Send via Email</strong> to open the Email Composer pre-filled with the report.</li>
+            <li>Embark saves the last 5 reports per client — view them in the Recent Reports section.</li>
+          </ul>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Requires an AI provider (Anthropic or Ollama) configured in Settings → AI.</p>
+      </div>
+    ),
+  },
+  {
+    id: 'ai-meeting-brief',
+    category: 'Intelligence & AI',
+    title: 'AI Meeting Brief',
+    icon: '📞',
+    summary: 'Get a pre-call intelligence brief before every client meeting',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          The Meeting Brief generates a structured one-pager before any client call — so you walk in fully prepared without digging through notes. Click <strong>Meeting Brief</strong> in the client header and the brief generates automatically.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">What's included</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-gray-900 dark:text-white">Client Status Snapshot</span> — health score, phase, % complete, lifecycle stage</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Recent Communications</span> — last 3 log entries with dates</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Open Action Items</span> — overdue and blocked tasks</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Talking Points</span> — AI-suggested discussion topics based on what's stalled</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Suggested Agenda</span> — a ready-to-use 30-minute meeting agenda</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Click <strong>Copy to Clipboard</strong> to paste into Zoom chat or a calendar invite.</li>
+            <li>Click <strong>Regenerate</strong> if you want a fresh take with different talking points.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'ai-plan-generator',
+    category: 'Intelligence & AI',
+    title: 'AI Onboarding Plan Generator',
+    icon: '✨',
+    summary: 'Generate a full onboarding plan from a prompt',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Instead of picking a template, you can ask the AI to generate a tailored onboarding plan for a new client. It creates phases, tasks, owners, and estimated durations based on the client's industry and complexity.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">How to use it</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Click <strong>+ New Client</strong> and proceed to the Template step.</li>
+            <li>Click <strong>Generate with AI</strong> instead of choosing a template.</li>
+            <li>Select industry, describe the product/services being onboarded, and set complexity.</li>
+            <li>Click <strong>Generate Plan</strong> — preview the phases and tasks.</li>
+            <li>Click <strong>Accept Plan</strong> to apply it to the new client, or <strong>Regenerate</strong> for another version.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">What gets generated</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Phases with names, colors, and descriptions</li>
+            <li>Tasks with titles, owner types (internal/client), priority levels, and relative due dates</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'churn-engagement',
+    category: 'Intelligence & AI',
+    title: 'Engagement Score & Churn Risk',
+    icon: '📈',
+    summary: 'Spot disengaged clients before they churn',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Embark tracks two predictive signals alongside the Health Score: an <strong>Engagement Score</strong> measuring how actively a client is participating, and a <strong>Churn Risk</strong> classification based on health trend.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Engagement Score (0–100)</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-gray-900 dark:text-white">Portal recency</span> — when did the client last visit their portal? (30 pts)</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Client task completion</span> — how many of their assigned tasks are done? (25 pts)</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Communication recency</span> — how recent and frequent are interactions? (25 pts)</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Task responsiveness</span> — how quickly do they complete tasks? (20 pts)</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Churn Risk</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-emerald-600">Stable ✓</span> — health trend is flat or improving</li>
+            <li><span className="font-medium text-yellow-600">Declining ⚠</span> — health has dropped 5–15 points/week</li>
+            <li><span className="font-medium text-red-600">High Risk 🔴</span> — health below 40 or dropping &gt;15 pts/week</li>
+          </ul>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Churn Watch on the Dashboard lists all declining/high-risk clients sorted by current score.</p>
+        </div>
+      </div>
+    ),
+  },
+
+  // ── Client Experience ─────────────────────────────────────────────────────
+  {
+    id: 'portal-branding',
+    category: 'Client Experience',
+    title: 'White-Label Portal Branding',
+    icon: '🎨',
+    summary: 'Brand the client portal with your company logo and colors',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Replace Embark branding with your own in every client portal. Clients see your logo, your colors, and your company name — not Embark's.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">How to set it up</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Open <strong>Settings</strong> (gear icon, top right).</li>
+            <li>Click the <strong>Branding</strong> tab.</li>
+            <li>Upload your logo, enter your company name and tagline, and pick your accent color.</li>
+            <li>The live preview updates in real time — what you see is what clients see.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">What gets branded</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Portal header gradient and logo</li>
+            <li>Company name and tagline in the portal header</li>
+            <li>Action buttons, progress bars, and the circular progress ring</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'embedded-media',
+    category: 'Client Experience',
+    title: 'Embedded Media in Tasks',
+    icon: '🎬',
+    summary: 'Attach Loom videos, Calendly links, and more to portal tasks',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Any task can have an embedded media attachment — a Loom walkthrough, a YouTube tutorial, a Calendly booking link, or a Typeform survey. Clients see the embed inline in their portal without leaving the page.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Adding media to a task</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Open a client and click to edit any checklist task.</li>
+            <li>Paste a URL into the <strong>Attach media URL</strong> field.</li>
+            <li>Embark auto-detects the type (Loom / YouTube / Calendly / Typeform / iframe).</li>
+            <li>Save the task — the embed is stored and shown in the portal.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Supported types</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>📹 <span className="font-medium text-gray-900 dark:text-white">Loom</span> — loom.com/share/... links auto-convert to embed URLs</li>
+            <li>▶️ <span className="font-medium text-gray-900 dark:text-white">YouTube</span> — watch?v= and youtu.be links auto-convert</li>
+            <li>📅 <span className="font-medium text-gray-900 dark:text-white">Calendly</span> — booking link embedded directly; note to complete after booking</li>
+            <li>📝 <span className="font-medium text-gray-900 dark:text-white">Typeform</span> — form embedded inline</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'approval-tasks',
+    category: 'Client Experience',
+    title: 'Approval / Sign-Off Tasks',
+    icon: '✍️',
+    summary: 'Require client approval before a task is marked complete',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Some tasks need explicit client sign-off before they're done — SOW review, deliverable acceptance, or go-live confirmation. Mark any task as requiring approval and clients see a dedicated Approve / Request Changes UI in their portal.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Setting up an approval task</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Edit any checklist task.</li>
+            <li>Check <strong>Requires Approval</strong>.</li>
+            <li>Save. The task now shows a yellow "⏳ Awaiting Approval" badge.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Client experience</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Client sees an amber approval card with <strong>Approve</strong> and <strong>Request Changes</strong> buttons.</li>
+            <li>Approving marks the task complete and records who approved it and when.</li>
+            <li>Requesting changes shows a text field for the rejection note.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Finding pending approvals</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Focus Mode shows a <strong>Pending Approvals</strong> card at the top with all tasks awaiting client sign-off, grouped by client.</p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'nps-survey',
+    category: 'Client Experience',
+    title: 'NPS / CSAT Surveys',
+    icon: '⭐',
+    summary: 'Collect Net Promoter Scores from clients with a shareable link',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Send clients a simple NPS survey at any point in their journey. Scores are stored in the client record and feed into the NPS Overview widget on the dashboard.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Sending a survey</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Open a client detail view.</li>
+            <li>Click <strong>Request NPS Survey</strong> — the survey URL is copied to your clipboard.</li>
+            <li>Paste the link into an email to your client.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Client experience</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>A clean, branded page with a 0–10 scale and optional comment field.</li>
+            <li>No login required — the link works for anyone.</li>
+            <li>After submitting, the client sees a thank-you message.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Score classification</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-emerald-600">Promoter</span> — 9–10</li>
+            <li><span className="font-medium text-yellow-600">Passive</span> — 7–8</li>
+            <li><span className="font-medium text-red-600">Detractor</span> — 0–6</li>
+          </ul>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">The NPS Overview dashboard widget appears once 3+ clients have responded.</p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'success-plan',
+    category: 'Client Experience',
+    title: 'Post-Onboarding Success Plan',
+    icon: '🏆',
+    summary: 'Keep driving value after go-live with structured success tracks',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          When a client graduates from onboarding, a Success Plan continues the engagement with structured Adoption, QBR, Expansion, and Renewal Prep tracks. Don't let the relationship go quiet after go-live.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Creating a Success Plan</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Graduate a client (complete all tasks → Graduation button).</li>
+            <li>When prompted, choose <strong>90-Day Success Plan</strong> or <strong>Annual Account Plan</strong>.</li>
+            <li>The plan is pre-populated with milestone tasks — customize as needed.</li>
+            <li>Access the plan at any time from the client detail view (active-client lifecycle stage).</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tracks</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>🚀 <span className="font-medium text-gray-900 dark:text-white">Adoption Milestones</span> — feature adoption and training goals</li>
+            <li>📅 <span className="font-medium text-gray-900 dark:text-white">QBR Schedule</span> — 30/60/90-day and quarterly business reviews</li>
+            <li>💰 <span className="font-medium text-gray-900 dark:text-white">Expansion Targets</span> — upsell and cross-sell opportunities</li>
+            <li>🔄 <span className="font-medium text-gray-900 dark:text-white">Renewal Prep</span> — NPS collection and renewal discussion</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">KPIs</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Track Adoption %, MRR Expansion, QBR completion, and NPS target — all editable inline from the Success Plan panel.</p>
+        </div>
+      </div>
+    ),
+  },
+
+  // ── Workflows ─────────────────────────────────────────────────────────────
+  {
+    id: 'smart-segments',
+    category: 'Workflows',
+    title: 'Smart Segments & Filter Builder',
+    icon: '🔍',
+    summary: 'Build compound filters and save them as reusable segments',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          The Filter Builder lets you combine multiple conditions with AND/OR logic to create dynamic client segments. Save a filter as a segment and reuse it instantly.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Using the filter builder</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Go to the Clients view and click the <strong>Filter</strong> button in the toolbar.</li>
+            <li>Click <strong>+ Add condition</strong> and choose a field, operator, and value.</li>
+            <li>Toggle between <strong>AND</strong> (all conditions must match) and <strong>OR</strong> (any condition matches).</li>
+            <li>Click <strong>Save as Segment</strong> to name and store the filter for reuse.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Filterable fields</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Health score, status, priority, lifecycle stage</li>
+            <li>Days since last contact, go-live proximity, MRR</li>
+            <li>Assigned to, tags</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Quick segments</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-gray-900 dark:text-white">At Risk Renewals</span> — health &lt; 60 and renewal within 90 days</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Stalled Onboardings</span> — no contact in 14+ days and status active</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">High Value, Low Health</span> — MRR &gt; $1,000 and health &lt; 60</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'capacity-planning',
+    category: 'Workflows',
+    title: 'Team Capacity Planning',
+    icon: '⚖️',
+    summary: 'See who has bandwidth to take the next client',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          The Capacity view shows per-member workload across active clients and open tasks so you can make smart assignment decisions without guessing.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Opening Capacity view</h3>
+          <ol className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Go to <strong>Team</strong> in the sidebar.</li>
+            <li>Click the <strong>Capacity</strong> tab.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Reading the capacity bars</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-emerald-600">Green</span> — under 70% capacity — plenty of headroom</li>
+            <li><span className="font-medium text-yellow-600">Yellow</span> — 70–90% — getting busy</li>
+            <li><span className="font-medium text-red-600">Red</span> — over 90% — at or above limit</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Recommended assignee</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">The member with the most headroom gets a green <strong>Recommended</strong> badge. Use this when adding a new client to pick the best person automatically.</p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Setting capacity limits</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">Click the capacity limit input on any member card to set their max (default 5 clients). Press Enter to save.</p>
+        </div>
+      </div>
+    ),
+  },
+
   // ── Team & More ───────────────────────────────────────────────────────────
   {
     id: 'team',
