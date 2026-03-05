@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, type ReactNode } from 'react';
 import { useClientContext } from '../../context/ClientContext';
 import { useNotifications } from '../../hooks/useNotifications';
 import { Button } from '../UI/Button';
+import { DashboardStatsSkeleton } from '../UI/Skeleton';
 import { SLAStatusWidget } from '../SLA/SLAStatusWidget';
 import { GoLiveWidget } from './GoLiveWidget';
 import { BlockedTasksWidget } from './BlockedTasksWidget';
@@ -39,6 +40,8 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
   const { preferences } = useNotifications();
   const { currentUser, updateUser } = useAuth();
   const [buildADashOpen, setBuildADashOpen] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => { setIsReady(true); }, []);
 
   const visibleWidgets: DashboardWidgetId[] =
     currentUser?.dashboardConfig?.visibleWidgets ?? DEFAULT_DASHBOARD_WIDGETS;
@@ -320,7 +323,8 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       )}
 
       {/* Stats Cards */}
-      {show('stats-bar') && <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {show('stats-bar') && !isReady && <DashboardStatsSkeleton />}
+      {show('stats-bar') && isReady && <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Clients"
           value={stats.total}

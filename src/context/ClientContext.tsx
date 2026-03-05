@@ -237,8 +237,9 @@ export function ClientProvider({ children }: ClientProviderProps) {
     gamification.trackClientAdded(newClient.id, activeCount);
     gamification.awardXP(10);
     gamification.trackDailyActivity();
+    showToast(`Client added: ${newClient.name}`, 'success');
     return newClient;
-  }, [clientOperations, executeAutomation, gamification]);
+  }, [clientOperations, executeAutomation, gamification, showToast]);
 
   const updateStatus = useCallback((clientId: string, status: Client['status']) => {
     const client = clientOperations.clients.find(c => c.id === clientId);
@@ -274,8 +275,9 @@ export function ClientProvider({ children }: ClientProviderProps) {
     if (client && phase) {
       gamification.awardXP(30);
       emit({ type: 'phase_advanced', clientId, phaseName: phase.name, timestamp: new Date().toISOString() });
+      showToast(`Phase "${phase.name}" completed!`, 'success');
     }
-  }, [clientOperations, gamification]);
+  }, [clientOperations, gamification, showToast]);
 
   const toggleChecklistItem = useCallback((clientId: string, itemId: string) => {
     const client = clientOperations.clients.find(c => c.id === clientId);
@@ -312,6 +314,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
 
     if (!client || !item || !isCompleting) return;
 
+    showToast(`Task completed: ${item.title}`, 'success');
     const taskPayload = { clientId, clientName: client.name, taskId: itemId, taskTitle: item.title, timestamp: new Date().toISOString() };
     emit({ type: 'task_completed', ...taskPayload });
     fireWebhook('task_completed', taskPayload);
@@ -345,7 +348,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         executeAutomation('all_tasks_completed', updatedClient);
       }
     }
-  }, [clientOperations, executeAutomation, notifyTaskCompleted, notifyClientCompleted, gamification]);
+  }, [clientOperations, executeAutomation, notifyTaskCompleted, notifyClientCompleted, gamification, showToast]);
 
   const completeMilestone = useCallback((clientId: string, milestoneId: string) => {
     const client = clientOperations.clients.find(c => c.id === clientId);
@@ -381,6 +384,85 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
     }
+  }, [clientOperations, showToast]);
+
+  const deleteClient = useCallback((id: string) => {
+    const client = clientOperations.clients.find(c => c.id === id);
+    const prevClients = [...clientOperations.clients];
+    clientOperations.deleteClient(id);
+    if (client) {
+      showToast(`Deleted ${client.name}`, 'undo', {
+        label: 'Undo',
+        onClick: () => clientOperations.setClientsDirectly(prevClients),
+      });
+    }
+  }, [clientOperations, showToast]);
+
+  const archiveClient = useCallback((id: string) => {
+    const client = clientOperations.clients.find(c => c.id === id);
+    const prevClients = [...clientOperations.clients];
+    clientOperations.archiveClient(id);
+    if (client) {
+      showToast(`Archived ${client.name}`, 'undo', {
+        label: 'Undo',
+        onClick: () => clientOperations.setClientsDirectly(prevClients),
+      });
+    }
+  }, [clientOperations, showToast]);
+
+  const restoreClient = useCallback((id: string) => {
+    const client = clientOperations.clients.find(c => c.id === id);
+    clientOperations.restoreClient(id);
+    if (client) {
+      showToast(`Restored ${client.name}`, 'success');
+    }
+  }, [clientOperations, showToast]);
+
+  const duplicateClient = useCallback((id: string): Client | null => {
+    const original = clientOperations.clients.find(c => c.id === id);
+    const duplicate = clientOperations.duplicateClient(id);
+    if (duplicate && original) {
+      showToast(`Duplicated ${original.name}`, 'success');
+    }
+    return duplicate;
+  }, [clientOperations, showToast]);
+
+  const applyTemplate = useCallback((clientId: string, template: ChecklistTemplate) => {
+    clientOperations.applyTemplate(clientId, template);
+    showToast(`Template applied: ${template.name}`, 'success');
+  }, [clientOperations, showToast]);
+
+  const bulkArchive = useCallback((clientIds: string[]) => {
+    const prevClients = [...clientOperations.clients];
+    clientOperations.bulkArchive(clientIds);
+    showToast(`Archived ${clientIds.length} client${clientIds.length > 1 ? 's' : ''}`, 'undo', {
+      label: 'Undo',
+      onClick: () => clientOperations.setClientsDirectly(prevClients),
+    });
+  }, [clientOperations, showToast]);
+
+  const bulkDelete = useCallback((clientIds: string[]) => {
+    const prevClients = [...clientOperations.clients];
+    clientOperations.bulkDelete(clientIds);
+    showToast(`Deleted ${clientIds.length} client${clientIds.length > 1 ? 's' : ''}`, 'undo', {
+      label: 'Undo',
+      onClick: () => clientOperations.setClientsDirectly(prevClients),
+    });
+  }, [clientOperations, showToast]);
+
+  const bulkRestore = useCallback((clientIds: string[]) => {
+    clientOperations.bulkRestore(clientIds);
+    showToast(`Restored ${clientIds.length} client${clientIds.length > 1 ? 's' : ''}`, 'success');
+  }, [clientOperations, showToast]);
+
+  const bulkUpdateStatus = useCallback((clientIds: string[], status: Client['status']) => {
+    clientOperations.bulkUpdateStatus(clientIds, status);
+    showToast(`Updated status for ${clientIds.length} client${clientIds.length > 1 ? 's' : ''}`, 'success');
+  }, [clientOperations, showToast]);
+
+  const bulkUpdatePriority = useCallback((clientIds: string[], priority: Priority) => {
+    clientOperations.bulkUpdatePriority(clientIds, priority);
+    showToast(`Updated priority for ${clientIds.length} client${clientIds.length > 1 ? 's' : ''}`, 'success');
   }, [clientOperations, showToast]);
 
   const addCommunication = useCallback((clientId: string, entry: Omit<CommunicationLogEntry, 'id' | 'timestamp'>) => {
@@ -482,8 +564,18 @@ export function ClientProvider({ children }: ClientProviderProps) {
 
   const value: ClientContextType = {
     ...clientOperations,
-    // Override with notification/automation/gamification-wired versions
+    // Override with notification/automation/gamification/toast-wired versions
     addClient,
+    deleteClient,
+    archiveClient,
+    restoreClient,
+    duplicateClient,
+    applyTemplate,
+    bulkArchive,
+    bulkDelete,
+    bulkRestore,
+    bulkUpdateStatus,
+    bulkUpdatePriority,
     updateStatus,
     updatePriority,
     toggleChecklistItem,
