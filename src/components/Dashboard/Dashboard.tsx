@@ -3,6 +3,8 @@ import { useClientContext } from '../../context/ClientContext';
 import { useNotifications } from '../../hooks/useNotifications';
 import { Button } from '../UI/Button';
 import { DashboardStatsSkeleton } from '../UI/Skeleton';
+import { useHealthHistory } from '../../hooks/useHealthHistory';
+import { HealthSparkline } from '../Clients/HealthSparkline';
 import { SLAStatusWidget } from '../SLA/SLAStatusWidget';
 import { GoLiveWidget } from './GoLiveWidget';
 import { BlockedTasksWidget } from './BlockedTasksWidget';
@@ -237,6 +239,17 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
     });
     return counts;
   }, [activeClients]);
+
+  const { getHistory, getTrend, getDelta } = useHealthHistory(activeClients);
+
+  const healthTrends = useMemo(() => {
+    const withDelta = activeClients
+      .map(c => ({ client: c, delta: getDelta(c.id), snapshots: getHistory(c.id), trend: getTrend(c.id) }))
+      .filter(x => x.snapshots.length >= 2);
+    const improved = [...withDelta].sort((a, b) => b.delta - a.delta).slice(0, 3).filter(x => x.delta > 0);
+    const declined = [...withDelta].sort((a, b) => a.delta - b.delta).slice(0, 3).filter(x => x.delta < 0);
+    return { improved, declined };
+  }, [activeClients, getDelta, getHistory, getTrend]);
 
   const renewalsSoon = useMemo(() => {
     const now = Date.now();
@@ -817,6 +830,44 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
 
       {/* Time Report */}
       {show('time-report') && <TimeReportWidget clients={activeClients} />}
+
+      {/* Health Trends */}
+      {show('health-trends') && (healthTrends.improved.length > 0 || healthTrends.declined.length > 0) && (
+        <div className="glass-card p-5">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 clip-diamond bg-violet-500 inline-block flex-shrink-0" />
+            Health Trends This Week
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {healthTrends.improved.length > 0 && (
+              <div>
+                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">Most Improved ↑</p>
+                <div className="space-y-2">
+                  {healthTrends.improved.map(({ client, snapshots, trend, delta }) => (
+                    <div key={client.id} className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{client.name}</span>
+                      <HealthSparkline snapshots={snapshots} trend={trend} delta={delta} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {healthTrends.declined.length > 0 && (
+              <div>
+                <p className="text-xs font-bold text-red-500 dark:text-red-400 uppercase tracking-wider mb-2">Steepest Decline ↓</p>
+                <div className="space-y-2">
+                  {healthTrends.declined.map(({ client, snapshots, trend, delta }) => (
+                    <div key={client.id} className="flex items-center justify-between gap-3">
+                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{client.name}</span>
+                      <HealthSparkline snapshots={snapshots} trend={trend} delta={delta} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Recent Clients */}
       {show('recent-clients') && <div className="glass-card p-6">

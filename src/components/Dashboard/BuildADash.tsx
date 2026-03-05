@@ -24,6 +24,7 @@ const WIDGETS: WidgetMeta[] = [
   { id: 'go-live-dates',     label: 'Go-Live Dates',   icon: '🚀', description: 'Clients with upcoming go-live dates' },
   { id: 'ai-portfolio-brief', label: 'AI Portfolio Brief', icon: '🧠', description: 'AI-powered at-risk client analysis' },
   { id: 'time-report',       label: 'Time Report',     icon: '⏱',  description: 'Hours per client, profitability ranking' },
+  { id: 'health-trends',     label: 'Health Trends',   icon: '📉', description: 'Most improved and steepest declining clients' },
 ];
 
 interface BuildADashProps {

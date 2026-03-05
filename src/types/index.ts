@@ -612,7 +612,7 @@ export type DashboardWidgetId =
   | 'stats-bar' | 'client-health' | 'tasks-overview' | 'priority-breakdown'
   | 'team-workload' | 'activity-feed' | 'onboarding-trend' | 'renewals'
   | 'recent-clients' | 'sla-status' | 'crm-panel' | 'blocked-tasks' | 'go-live-dates'
-  | 'ai-portfolio-brief' | 'time-report';
+  | 'ai-portfolio-brief' | 'time-report' | 'health-trends';
 
 export const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetId[] = [
   'stats-bar', 'client-health', 'tasks-overview', 'activity-feed', 'recent-clients', 'renewals',

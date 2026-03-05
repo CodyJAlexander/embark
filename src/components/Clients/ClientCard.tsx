@@ -5,7 +5,9 @@ import { computeHealthScore } from '../../utils/healthScore';
 import { computeNextAction } from '../../utils/nextAction';
 import { useSLAStatuses } from '../../hooks/useSLA';
 import { HealthScoreBadge } from './HealthScoreBadge';
+import { HealthSparkline } from './HealthSparkline';
 import { NextActionBanner } from './NextActionBanner';
+import type { HealthSnapshot } from '../../hooks/useHealthHistory';
 
 const STAGE_COLORS: Record<LifecycleStage, string> = {
   'onboarding':    'bg-blue-100 text-blue-700 border-blue-300',
@@ -27,6 +29,10 @@ interface ClientCardProps {
   isSelected?: boolean;
   onToggleSelect?: (clientId: string) => void;
   selectionMode?: boolean;
+  sparklineSnapshots?: HealthSnapshot[];
+  sparklineTrend?: 'up' | 'down' | 'stable';
+  sparklineDelta?: number;
+  onContextMenu?: (e: React.MouseEvent, client: Client) => void;
 }
 
 const statusColors = {
@@ -68,7 +74,7 @@ function goLiveChip(date: string): { label: string; className: string } | null {
   return { label: `${daysLeft}d to go-live`, className: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' };
 }
 
-export function ClientCard({ client, onSelect, isSelected, onToggleSelect, selectionMode }: ClientCardProps) {
+export function ClientCard({ client, onSelect, isSelected, onToggleSelect, selectionMode, sparklineSnapshots, sparklineTrend, sparklineDelta, onContextMenu }: ClientCardProps) {
   const completedTasks = client.checklist.filter((item) => item.completed).length;
   const totalTasks = client.checklist.length;
   const health = getClientHealth(client);
@@ -96,6 +102,7 @@ export function ClientCard({ client, onSelect, isSelected, onToggleSelect, selec
   return (
     <div
       onClick={handleClick}
+      onContextMenu={onContextMenu ? (e) => onContextMenu(e, client) : undefined}
       className={`glass-card p-5 cursor-pointer transition-all relative group ${
         isSelected
           ? 'ring-2 ring-yellow-400 ring-offset-0 border-yellow-400'
@@ -157,7 +164,16 @@ export function ClientCard({ client, onSelect, isSelected, onToggleSelect, selec
               {STAGE_LABELS[client.lifecycleStage]}
             </span>
           )}
-          <HealthScoreBadge score={healthScore} />
+          <div className="flex items-center gap-1.5">
+            <HealthScoreBadge score={healthScore} />
+            {sparklineSnapshots && sparklineTrend && sparklineDelta !== undefined && (
+              <HealthSparkline
+                snapshots={sparklineSnapshots}
+                trend={sparklineTrend}
+                delta={sparklineDelta}
+              />
+            )}
+          </div>
         </div>
       </div>
 
