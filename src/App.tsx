@@ -45,6 +45,7 @@ const IntegrationsView = lazy(() => import('./components/Integrations/Integratio
 const FocusView = lazy(() => import('./components/Focus/FocusView').then(m => ({ default: m.FocusView })));
 const GlobalTaskKanban = lazy(() => import('./components/Views/GlobalTaskKanban'));
 const FormsView = lazy(() => import('./components/Forms/FormsView').then(m => ({ default: m.FormsView })));
+const RenewalPipelineView = lazy(() => import('./components/Views/RenewalPipelineView').then(m => ({ default: m.RenewalPipelineView })));
 
 function AnomalyDetector({ clients }: { clients: Client[] }) {
   useAnomalyDetection(clients);
@@ -232,6 +233,7 @@ function AppContent() {
             {currentView === 'reports' && <ReportView />}
             {currentView === 'integrations' && <IntegrationsView />}
             {currentView === 'focus' && <FocusView onSelectClient={handleSelectClient} />}
+            {currentView === 'renewals' && <RenewalPipelineView />}
           </Suspense>
         </div>
         <FloatingActionButton onAddClient={handleAddClient} />
