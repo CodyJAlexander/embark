@@ -636,6 +636,48 @@ export function exportOnboardingStatusReport(clients: Client[]): void {
   );
 }
 
+export function exportContactEmails(clients: Client[]): void {
+  const headers = ['Client Name', 'Contact Name', 'Email', 'Title', 'Is Primary', 'Phone'];
+
+  const rows: string[][] = [];
+
+  for (const client of clients) {
+    if (client.contacts && client.contacts.length > 0) {
+      for (const contact of client.contacts) {
+        rows.push([
+          escapeCSV(client.name),
+          escapeCSV(contact.name),
+          escapeCSV(contact.email),
+          escapeCSV(contact.title || ''),
+          contact.isPrimary ? 'Yes' : 'No',
+          escapeCSV(contact.phone || ''),
+        ]);
+      }
+    } else if (client.email) {
+      // Fallback: use legacy email field
+      rows.push([
+        escapeCSV(client.name),
+        escapeCSV(client.name),
+        escapeCSV(client.email),
+        '',
+        'Yes',
+        escapeCSV(client.phone || ''),
+      ]);
+    }
+  }
+
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `contact-emails-${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 export function restoreFullAppBackup(data: Record<string, unknown>): number {
   let keysRestored = 0;
 

@@ -195,6 +195,16 @@ function AppContent() {
     { key: 't', shift: true, handler: () => setCurrentView('team') },
   ]);
 
+  // Listen for navigation events from deep components (e.g. EmailImportPanel)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const view = (e as CustomEvent<{ view: View }>).detail?.view;
+      if (view) setCurrentView(view);
+    };
+    window.addEventListener('embark:navigate', handler);
+    return () => window.removeEventListener('embark:navigate', handler);
+  }, []);
+
   const handleSelectClient = useCallback((client: Client) => {
     setSelectedClientId(client.id);
     setCurrentView('clients');

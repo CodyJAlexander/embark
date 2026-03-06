@@ -4,12 +4,16 @@ import { Modal } from './Modal';
 import { AISettingsPanel } from '../AI/AISettingsPanel';
 import { NotificationPreferences } from '../Notifications/NotificationPreferences';
 import { BrandingSettings } from '../Settings/BrandingSettings';
+import { EmailImportPanel } from '../Settings/EmailImportPanel';
 import { KeepWatchLogo } from './KeepWatchLogo';
+import { exportContactEmails } from '../../utils/export';
+import { useClientContext } from '../../context/ClientContext';
 
-type SettingsTab = 'appearance' | 'ai' | 'notifications' | 'branding';
+type SettingsTab = 'appearance' | 'ai' | 'notifications' | 'branding' | 'data';
 
 export function SettingsMenu() {
   const { mode, colorTheme, setMode, setColorTheme } = useTheme();
+  const { clients } = useClientContext();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
 
@@ -39,7 +43,7 @@ export function SettingsMenu() {
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Settings">
         {/* Tabs */}
         <div className="flex mb-6 border-2 border-zinc-900 dark:border-white shadow-[4px_4px_0_0_#18181b] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.15)] rounded-[4px] bg-white dark:bg-zinc-900 overflow-hidden">
-          {(['appearance', 'ai', 'notifications', 'branding'] as const).map((tab) => (
+          {(['appearance', 'ai', 'notifications', 'branding', 'data'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -168,6 +172,24 @@ export function SettingsMenu() {
 
         {activeTab === 'branding' && (
           <BrandingSettings />
+        )}
+
+        {activeTab === 'data' && (
+          <div className="space-y-6">
+            <EmailImportPanel />
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-4">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Export</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Download a CSV of every contact email across all clients.
+              </p>
+              <button
+                onClick={() => exportContactEmails(clients)}
+                className="px-4 py-2 text-sm font-medium border-2 border-zinc-300 dark:border-zinc-600 rounded-[4px] text-gray-700 dark:text-gray-300 hover:border-zinc-900 dark:hover:border-white hover:text-gray-900 dark:hover:text-white shadow-[2px_2px_0_0_#d1d5db] dark:shadow-[2px_2px_0_0_rgba(255,255,255,0.08)] transition-colors"
+              >
+                Export All Contact Emails
+              </button>
+            </div>
+          </div>
         )}
       </Modal>
     </>
