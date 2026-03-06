@@ -500,7 +500,7 @@ export function ClientList({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 className="text-2xl font-display font-black text-gray-900 dark:text-gray-100">
               {showArchived ? 'Archived Clients' : 'Client Onboardings'}
             </h2>
             {archivedClients.length > 0 && (
@@ -583,39 +583,48 @@ export function ClientList({
             </div>
           </div>
           <div className="flex gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); handleFilterChange(); }}
-              className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="on-hold">On Hold</option>
-              <option value="completed">Completed</option>
-            </select>
-            <select
-              value={assigneeFilter}
-              onChange={(e) => { setAssigneeFilter(e.target.value); handleFilterChange(); }}
-              className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Assignees</option>
-              {assignees.map((assignee) => (
-                <option key={assignee} value={assignee}>
-                  {assignee}
-                </option>
-              ))}
-            </select>
-            <select
-              value={lifecycleFilter}
-              onChange={(e) => { setLifecycleFilter(e.target.value as LifecycleStage | 'all'); handleFilterChange(); }}
-              className="px-3 py-2 rounded-lg border bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Stages</option>
-              <option value="onboarding">Onboarding</option>
-              <option value="active-client">Active Client</option>
-              <option value="at-risk">At Risk</option>
-              <option value="churned">Churned</option>
-            </select>
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => { setStatusFilter(e.target.value); handleFilterChange(); }}
+                className="appearance-none border-2 border-zinc-900 dark:border-zinc-600 shadow-[2px_2px_0_0_#18181b] rounded-[4px] bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-1.5 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="on-hold">On Hold</option>
+                <option value="completed">Completed</option>
+              </select>
+              <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </div>
+            <div className="relative">
+              <select
+                value={assigneeFilter}
+                onChange={(e) => { setAssigneeFilter(e.target.value); handleFilterChange(); }}
+                className="appearance-none border-2 border-zinc-900 dark:border-zinc-600 shadow-[2px_2px_0_0_#18181b] rounded-[4px] bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-1.5 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              >
+                <option value="all">All Assignees</option>
+                {assignees.map((assignee) => (
+                  <option key={assignee} value={assignee}>
+                    {assignee}
+                  </option>
+                ))}
+              </select>
+              <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </div>
+            <div className="relative">
+              <select
+                value={lifecycleFilter}
+                onChange={(e) => { setLifecycleFilter(e.target.value as LifecycleStage | 'all'); handleFilterChange(); }}
+                className="appearance-none border-2 border-zinc-900 dark:border-zinc-600 shadow-[2px_2px_0_0_#18181b] rounded-[4px] bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-1.5 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              >
+                <option value="all">All Stages</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="active-client">Active Client</option>
+                <option value="at-risk">At Risk</option>
+                <option value="churned">Churned</option>
+              </select>
+              <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </div>
             <SavedViewsManager
               savedViews={savedViews}
               pinnedViews={pinnedViews}

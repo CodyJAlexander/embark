@@ -285,7 +285,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
           <div className="print:hidden flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
             <button
               onClick={handleCopyEmail}
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white/20 border-2 border-white shadow-[3px_3px_0_0_rgba(255,255,255,0.4)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] rounded-[4px] text-sm font-semibold transition-all"
               title="Copy progress email to clipboard"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -295,7 +295,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
             </button>
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white/20 border-2 border-white shadow-[3px_3px_0_0_rgba(255,255,255,0.4)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] rounded-[4px] text-sm font-semibold transition-all"
               title="Print this page"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -314,7 +314,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
       <div className="max-w-2xl mx-auto px-6 py-8 space-y-6">
         {/* Progress block */}
-        <div className="bg-slate-50 rounded-2xl p-6">
+        <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6 border-t-4" style={{ borderTopColor: branding.accentColor || '#7c3aed' }}>
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Onboarding Progress</h2>
           <div className="flex items-center gap-8 flex-wrap">
             {/* Ring */}
@@ -351,7 +351,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Health Banner */}
         {healthBanner && (
-          <div className={`rounded-2xl p-4 border flex items-center gap-3 ${healthBanner.cls}`}>
+          <div className={`border-2 border-zinc-900 rounded-[4px] p-4 flex items-center gap-3 ${healthBanner.cls}`}>
             <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -361,7 +361,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Horizontal Phase Timeline */}
         {sortedPhases.length > 0 && client.targetGoLiveDate && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6 border-t-4" style={{ borderTopColor: branding.accentColor || '#7c3aed' }}>
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Phase Timeline</h2>
             <div className="relative">
               {/* Base line */}
@@ -393,7 +393,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Upcoming Tasks — next 14 days */}
         {upcomingTasks.length > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Upcoming (Next 14 Days)</h2>
             <div className="space-y-2">
               {upcomingTasks.map(t => (
@@ -410,7 +410,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Milestone timeline */}
         {milestones.length > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Milestones</h2>
             <div className="flex items-center gap-3 flex-wrap mb-3">
               {milestones.map(m => {
@@ -442,7 +442,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Phase-grouped progress (if phases exist) */}
         {sortedPhases.length > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Onboarding Phases</h2>
             <div className="space-y-3">
               {sortedPhases.map((phase) => {
@@ -471,7 +471,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Your Action Items (client-owned tasks) — interactive */}
         {clientActionItems.length > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6 border-l-4 border-violet-500">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6 border-t-4 border-t-violet-500">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Your Action Items</h2>
             <div className="space-y-4">
               {clientActionItems.map((t) => {
@@ -627,7 +627,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
         )}
 
         {/* Project Status Update */}
-        <div className="bg-slate-50 rounded-2xl p-6">
+        <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Post a Status Update</h2>
           {(client.communicationLog ?? []).filter(e => e.source === 'client-portal').slice(-3).reverse().map(entry => (
             <div key={entry.id} className="mb-3 text-sm bg-white rounded-xl p-3 shadow-sm">
@@ -655,7 +655,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* What We're Working On (internal tasks) */}
         {internalItems.length > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">What We&apos;re Working On</h2>
             <ol className="space-y-2 list-decimal list-inside">
               {internalItems.map((t) => (
@@ -672,7 +672,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Fallback: show all incomplete tasks if neither bucket has items */}
         {clientActionItems.length === 0 && internalItems.length === 0 && sortedPhases.length === 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Next Steps</h2>
             <ol className="space-y-2 list-decimal list-inside">
               {sortByDue(client.checklist.filter(t => !t.completed)).slice(0, 5).map((t) => (
@@ -689,7 +689,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Key Dates */}
         {keyDates.length > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Key Dates</h2>
             <dl className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm">
               {keyDates.map(d => (
@@ -704,7 +704,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
 
         {/* Team */}
         {(client.assignments?.length ?? 0) > 0 && (
-          <div className="bg-slate-50 rounded-2xl p-6">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Team</h2>
             <div className="flex flex-wrap gap-4">
               {(client.assignments ?? []).map((a, idx) => (
@@ -720,7 +720,7 @@ export function ClientPortalView({ client }: ClientPortalViewProps) {
         )}
         {/* QR Code */}
         {qrDataUrl && (
-          <div className="bg-slate-50 rounded-2xl p-6 print:hidden">
+          <div className="bg-slate-50 border-2 border-zinc-900 rounded-[4px] p-6 print:hidden">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-4">Share This Portal</h2>
             <div className="flex items-center gap-6 flex-wrap">
               <img src={qrDataUrl} alt="Portal QR Code" className="w-24 h-24 rounded-lg border border-slate-200" />

@@ -364,7 +364,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* Needs Attention Widget */}
       {show('client-health') && needsAttentionClients.length > 0 && (
         <div className="glass-card p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
             <span className="w-2.5 h-2.5 clip-diamond bg-red-500 animate-pulse inline-block flex-shrink-0" />
             Needs Attention
           </h2>
@@ -391,7 +391,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* Churn Watch */}
       {show('client-health') && churnWatchClients.length > 0 && (
         <div className="glass-card p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
             <span className="w-2.5 h-2.5 clip-diamond bg-orange-500 animate-pulse inline-block flex-shrink-0" />
             Churn Watch
           </h2>
@@ -421,7 +421,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* Engagement Watch */}
       {show('client-health') && engagementLeaderboard && (engagementLeaderboard.top.length > 0 || engagementLeaderboard.bottom.length > 0) && (
         <div className="glass-card p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
             <span className="w-2.5 h-2.5 clip-diamond bg-violet-500 inline-block flex-shrink-0" />
             Engagement Watch
           </h2>
@@ -494,6 +494,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
             </svg>
           }
           color="blue"
+          accentClass="border-l-4 border-yellow-400"
         />
         <StatCard
           title="Active"
@@ -535,6 +536,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
               </svg>
             }
             color="green"
+            accentClass="border-l-4 border-yellow-400"
           />
         )}
       </div>}
@@ -542,7 +544,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* NPS Overview */}
       {npsOverview && (
         <div className="glass-card p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
             <span className="w-2.5 h-2.5 clip-diamond bg-indigo-500 inline-block flex-shrink-0" />
             NPS Overview
           </h2>
@@ -580,7 +582,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* CRM Panel */}
       {show('crm-panel') && hasCrmData && (
         <div className="border-2 border-zinc-900 dark:border-zinc-100 shadow-[4px_4px_0_0_#18181b] dark:shadow-[4px_4px_0_0_#f4f4f5] rounded-[4px] p-6 space-y-5 bg-white dark:bg-zinc-900">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider flex items-center gap-2">
             <span className="w-2.5 h-2.5 clip-diamond bg-emerald-500 inline-block flex-shrink-0" />
             CRM Overview
           </h2>
@@ -659,7 +661,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
         {/* Overdue Tasks */}
         <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 deco-prefix">
+            <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 deco-prefix">
               Overdue Tasks
             </h2>
             {overdueTasks.length > 0 && (
@@ -695,7 +697,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
         {/* Upcoming Tasks */}
         <div className="glass-card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 deco-prefix">
+            <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 deco-prefix">
               Upcoming This Week
             </h2>
             {upcomingTasks.length > 0 && (
@@ -731,7 +733,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
 
       {/* Task Completion Trend */}
       {show('onboarding-trend') && <div className="glass-card p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
           Task Activity (Last 7 Days)
         </h2>
         <TrendChart data={completionTrend} />
@@ -751,7 +753,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Services Distribution */}
         <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
             Services Distribution
           </h2>
           {servicesDistribution.length === 0 ? (
@@ -795,7 +797,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
 
         {/* Quick Stats */}
         <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
             Performance Metrics
           </h2>
           <div className="space-y-4">
@@ -858,7 +860,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {show('priority-breakdown') && <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Status Distribution */}
         <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
             Status Distribution
           </h2>
           {activeClients.length === 0 ? (
@@ -897,7 +899,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
 
         {/* Priority Distribution */}
         <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
             Priority Distribution
           </h2>
           {activeClients.length === 0 ? (
@@ -919,7 +921,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {(show('team-workload') || show('activity-feed')) && <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Team Workload */}
         {show('team-workload') && <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
             Team Workload
           </h2>
           {teamWorkload.length === 0 ? (
@@ -964,7 +966,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
 
         {/* Recent Activity */}
         {show('activity-feed') && <div className="glass-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100 mb-4">
             Recent Activity
           </h2>
           {recentActivity.length === 0 ? (
@@ -1000,7 +1002,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* Renewals (standalone) */}
       {show('renewals') && renewalsSoon.length > 0 && (
         <div className="glass-card p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3 flex items-center gap-2">
             <span>🔔</span> Upcoming Renewals
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -1031,7 +1033,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* Health Trends */}
       {show('health-trends') && (healthTrends.improved.length > 0 || healthTrends.declined.length > 0) && (
         <div className="glass-card p-5">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h2 className="text-sm font-display font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-4 flex items-center gap-2">
             <span className="w-2.5 h-2.5 clip-diamond bg-violet-500 inline-block flex-shrink-0" />
             Health Trends This Week
           </h2>
@@ -1069,7 +1071,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {/* Recent Clients */}
       {show('recent-clients') && <div className="glass-card p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-display font-black text-gray-900 dark:text-gray-100">
             Recent Clients
           </h2>
           <button
@@ -1144,7 +1146,7 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
   );
 }
 
-function StatCard({ title, value, icon, color }: { title: string; value: string | number; icon: ReactNode; color: string }) {
+function StatCard({ title, value, icon, color, accentClass = '' }: { title: string; value: string | number; icon: ReactNode; color: string; accentClass?: string }) {
   const numericValue = typeof value === 'number' ? value : null;
   const countedValue = useCountUp(numericValue ?? 0);
   const displayValue = numericValue !== null ? countedValue : value;
@@ -1176,14 +1178,14 @@ function StatCard({ title, value, icon, color }: { title: string; value: string 
     : cardBgColors[color as keyof typeof cardBgColors];
 
   return (
-    <div className="glass-card brut-hover group p-6 cursor-default" style={{ backgroundColor: bgColor }}>
+    <div className={`glass-card brut-hover group p-6 cursor-default ${accentClass}`} style={{ backgroundColor: bgColor }}>
       <div className="flex items-center gap-4">
         <div className={`p-3 clip-hex ${iconColors[color as keyof typeof iconColors]}`}>
           {icon}
         </div>
         <div>
           <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">{title}</p>
-          <p className="text-2xl font-black text-zinc-900 dark:text-white transition-transform duration-100 group-hover:scale-110">{displayValue}</p>
+          <p className="stat-number text-zinc-900 dark:text-white transition-transform duration-100 group-hover:scale-110">{displayValue}</p>
         </div>
       </div>
     </div>

@@ -38,47 +38,20 @@ export function SettingsMenu() {
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Settings">
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
-          <button
-            onClick={() => setActiveTab('appearance')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'appearance'
-                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Appearance
-          </button>
-          <button
-            onClick={() => setActiveTab('ai')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'ai'
-                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            AI
-          </button>
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'notifications'
-                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Notifications
-          </button>
-          <button
-            onClick={() => setActiveTab('branding')}
-            className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-              activeTab === 'branding'
-                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Branding
-          </button>
+        <div className="flex mb-6 border-2 border-zinc-900 dark:border-white shadow-[4px_4px_0_0_#18181b] dark:shadow-[4px_4px_0_0_rgba(255,255,255,0.15)] rounded-[4px] bg-white dark:bg-zinc-900 overflow-hidden">
+          {(['appearance', 'ai', 'notifications', 'branding'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors capitalize ${
+                activeTab === tab
+                  ? 'bg-yellow-400 text-zinc-900 font-bold border-b-2 border-zinc-900'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
         {/* Tab Content */}
@@ -92,10 +65,10 @@ export function SettingsMenu() {
             <div className="flex gap-2">
               <button
                 onClick={() => setMode('light')}
-                className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-[4px] border-2 transition-all ${
                   mode === 'light'
-                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-lg'
-                    : 'glass-subtle text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-white/15'
+                    ? 'bg-yellow-400 text-zinc-900 border-zinc-900 shadow-[2px_2px_0_0_#18181b] font-bold'
+                    : 'bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-400 border-zinc-300 dark:border-zinc-600 hover:border-zinc-900 dark:hover:border-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700'
                 }`}
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,10 +83,10 @@ export function SettingsMenu() {
               </button>
               <button
                 onClick={() => setMode('dark')}
-                className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-[4px] border-2 transition-all ${
                   mode === 'dark'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                    : 'glass-subtle text-gray-600 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-white/15'
+                    ? 'bg-zinc-900 text-yellow-400 border-zinc-900 shadow-[2px_2px_0_0_#18181b] font-bold'
+                    : 'bg-white dark:bg-zinc-800 text-gray-600 dark:text-gray-400 border-zinc-300 dark:border-zinc-600 hover:border-zinc-900 dark:hover:border-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700'
                 }`}
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

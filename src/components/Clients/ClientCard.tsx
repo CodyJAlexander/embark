@@ -182,7 +182,7 @@ export function ClientCard({ client, onSelect, isSelected, onToggleSelect, selec
 
       <div className={`flex items-start justify-between mb-3 ${selectionMode || isSelected ? 'pl-7' : ''}`}>
         <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+          <h3 className="text-lg font-black font-display text-gray-900 dark:text-gray-100 truncate">
             {client.name}
           </h3>
           {chip && (
@@ -287,9 +287,9 @@ export function ClientCard({ client, onSelect, isSelected, onToggleSelect, selec
           )}
         </div>
         {totalTasks > 0 && (
-          <div className="mt-2 w-full bg-zinc-200 dark:bg-zinc-600 rounded-[2px] h-1.5 overflow-hidden">
+          <div className="mt-2 w-full bg-zinc-200 dark:bg-zinc-600 rounded-none h-2.5 overflow-hidden border border-zinc-900 dark:border-zinc-600">
             <div
-              className="bg-yellow-400 h-1.5 progress-bar"
+              className="bg-yellow-400 h-2.5 progress-bar rounded-none"
               style={{ width: `${(completedTasks / totalTasks) * 100}%` }}
             />
           </div>

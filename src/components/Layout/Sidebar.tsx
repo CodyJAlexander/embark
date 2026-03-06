@@ -188,6 +188,14 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
   const { currentUser, logout } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const classColors: Record<string, string> = {
+    paladin: 'bg-yellow-400 text-zinc-900',
+    wizard:  'bg-violet-500 text-white',
+    ranger:  'bg-emerald-500 text-white',
+    rogue:   'bg-zinc-900 text-yellow-400',
+  };
+  const avatarColor = classColors[currentUser?.characterClass ?? ''] ?? 'bg-zinc-700 text-white';
+
   useEffect(() => {
     if (!userMenuOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -485,7 +493,7 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
             {currentUser.avatarUrl ? (
               <img src={currentUser.avatarUrl} alt="avatar" className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-zinc-600" />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-600 to-yellow-500 flex items-center justify-center text-white text-xs font-black flex-shrink-0">
+              <div className={`w-7 h-7 rounded-[4px] border border-zinc-600 flex items-center justify-center text-xs font-black flex-shrink-0 ${avatarColor}`}>
                 {currentUser.username[0].toUpperCase()}
               </div>
             )}
