@@ -9,7 +9,7 @@
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Tests](https://img.shields.io/badge/Tests-52_passing-22c55e?style=for-the-badge)](#)
-[![Version](https://img.shields.io/badge/Version-8.1-f59e0b?style=for-the-badge)](#)
+[![Version](https://img.shields.io/badge/Version-8.2-f59e0b?style=for-the-badge)](#)
 [![PWA](https://img.shields.io/badge/PWA-installable-a855f7?style=for-the-badge)](#)
 
 *Embark replaces the chaos of spreadsheets and scattered notes with a structured, gamified system that keeps every client onboarding on track — from first call to go-live.*
@@ -31,7 +31,35 @@ Most onboarding tools are either too simple (a checklist app) or too complex (an
 
 ---
 
-## 🆕 What's New in v8.1 — Email Bulk Import & Contact Export
+## 🆕 What's New in v8.2 — Security & Stability
+
+A focused hardening release addressing security vulnerabilities, data bugs, and performance issues surfaced by a full codebase audit.
+
+### Security
+- **API key protection** — Anthropic API key no longer written to localStorage. It lives only in memory and is never persisted to storage.
+- **XSS fix in portal export** — All client-controlled values (names, task titles, phase names, etc.) are now HTML-escaped before being written into exported portal files.
+- **iframe embed allowlist** — Embedded media URLs are validated against a strict allowlist (Loom, YouTube, Calendly, Typeform). A sandbox bypass (`allow-same-origin` + `allow-scripts`) has been removed.
+
+### Bug Fixes
+- **Webhook backup/restore data loss** — All webhook endpoints were silently lost on every backup restore due to a storage key mismatch. Fixed.
+- **Health score accuracy** — New clients no longer start at a perfect 100/100. Communication recency now defaults to 0.
+- **SLA accuracy** — The first-response SLA is now dismissed by actual communication entries, not by any completed internal task.
+- **Client filter accuracy** — Clients with no contact history no longer match "last contacted within N days" filters.
+- **Go-live date off-by-one** — Date comparisons now normalize to local midnight, fixing a 1-day error for users outside UTC.
+- **`the_planner` deed** — Can now be unlocked (was registered but never evaluated).
+- **Storage keys standardized** — `onboarding-clients` and `onboarding-automations` renamed to `embark-clients` / `embark-automations`. Existing data is auto-migrated.
+
+### Performance & Stability
+- Memoized expensive per-card computations (health score, churn risk, next action, go-live forecast)
+- Fixed `requestAnimationFrame` and `setTimeout` memory leaks on component unmount
+- Fixed a gamification overlay dismiss loop
+- Stabilized notification helper re-memoization cascade
+
+See [CHANGELOG.md](./CHANGELOG.md) for the full list of 35 fixes.
+
+---
+
+## 🔖 Previous: v8.1 — Email Bulk Import & Contact Export
 
 Onboard a whole batch of contacts without going through the intake wizard one at a time.
 
@@ -43,7 +71,7 @@ Download a clean CSV of every contact email across all clients — Client Name, 
 
 ---
 
-## 🔖 Previous: v8.0 — "Embark Ascendant"
+## 🔖 v8.0 — "Embark Ascendant"
 
 Embark v8.0 is a full competitive upgrade — closing every gap against Rocketlane, Arrows.to, GUIDEcx, and ChurnZero with 14 new features across four tiers.
 
