@@ -239,11 +239,16 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
       }`}
     >
       {/* Logo */}
-      <div className="p-4 border-b-2 border-zinc-700 flex items-center justify-center">
-        {isCollapsed ? (
-          <span className="embark-glow font-black text-lg font-display">E</span>
-        ) : (
-          <span className="embark-glow font-black text-xl tracking-tight font-display">Embark</span>
+      <div className="p-3 border-b-2 border-zinc-700 flex items-center justify-center gap-2">
+        <div className={`rounded-[4px] border-2 border-yellow-400 flex-shrink-0 overflow-hidden transition-all ${isCollapsed ? 'w-8 h-8' : 'w-9 h-9'}`}>
+          <img
+            src="/mascot-clean.jpg"
+            alt="Embark"
+            className="w-[200%] h-[200%] object-cover translate-x-[0%] -translate-y-[18%]"
+          />
+        </div>
+        {!isCollapsed && (
+          <span className="embark-glow font-black text-lg tracking-tight font-display">Embark</span>
         )}
       </div>
 

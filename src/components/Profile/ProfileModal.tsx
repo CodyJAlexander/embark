@@ -59,11 +59,7 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
       <div className="space-y-5">
         {/* Avatar */}
         <div className="flex justify-center">
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="relative w-20 h-20 rounded-full border-4 border-yellow-400 shadow-[3px_3px_0_0_#18181b] overflow-hidden hover:opacity-90 transition-opacity group"
-            title="Click to upload photo"
-          >
+          <div className="relative w-20 h-20 rounded-full border-4 border-yellow-400 shadow-[3px_3px_0_0_#18181b] overflow-hidden group cursor-pointer">
             {avatarUrl ? (
               <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
             ) : (
@@ -71,11 +67,18 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
                 {initials}
               </div>
             )}
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
               <span className="text-white text-xs font-bold">📷</span>
             </div>
-          </button>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              title="Upload photo"
+            />
+          </div>
         </div>
 
         {/* Editable fields */}

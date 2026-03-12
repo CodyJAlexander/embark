@@ -33,10 +33,12 @@ export function Header({ onSelectClient, onMenuToggle, showMenuButton, onOpenCha
             )}
             {/* Mobile logo */}
             <div className="lg:hidden flex items-center gap-2">
-              <div className="p-1.5 bg-yellow-400 rounded-[4px] border border-zinc-900">
-                <svg className="w-4 h-4 text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+              <div className="w-8 h-8 rounded-[4px] border-2 border-yellow-400 overflow-hidden flex-shrink-0">
+                <img
+                  src="/mascot-clean.jpg"
+                  alt="Embark"
+                  className="w-[200%] h-[200%] object-cover translate-x-[0%] -translate-y-[18%]"
+                />
               </div>
               <span className="font-black text-zinc-900 dark:text-white">Embark</span>
             </div>

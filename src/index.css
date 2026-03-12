@@ -257,6 +257,27 @@ body:where(.dark, .dark *) {
   animation: slide-up 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* Mascot float animation — used on auth screens */
+@keyframes mascot-float {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  50%       { transform: translateY(-12px) rotate(1deg); }
+}
+.animate-mascot-float {
+  animation: mascot-float 3.5s ease-in-out infinite;
+}
+
+/* Auth screen entrance */
+@keyframes auth-slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-auth-enter {
+  animation: auth-slide-up 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+.animate-auth-enter-delay {
+  animation: auth-slide-up 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) 0.15s both;
+}
+
 /* Health status dot pulse */
 @keyframes health-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }

@@ -53,121 +53,142 @@ export function RegisterPage({ onShowLogin }: RegisterPageProps) {
     setForm(prev => ({ ...prev, [field]: e.target.value }));
 
   return (
-    <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Hero */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-400 rounded-[4px] border-4 border-zinc-900 shadow-[4px_4px_0_0_#18181b] mb-4">
-            <span className="text-2xl font-black text-zinc-900">E</span>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden"
+      style={{ background: 'linear-gradient(160deg, #f5f0e6 0%, #eee8d6 50%, #f0eddb 100%)' }}
+    >
+      {/* Decorative background blobs */}
+      <div className="absolute top-[-80px] left-[-60px] w-72 h-72 rounded-full opacity-30" style={{ background: '#facc15' }} />
+      <div className="absolute bottom-[-60px] right-[-40px] w-56 h-56 rounded-full opacity-20" style={{ background: '#2563eb' }} />
+      <div className="absolute top-1/3 right-[-30px] w-40 h-40 rounded-full opacity-20" style={{ background: '#65a30d' }} />
+
+      {/* Dot grid overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(24,24,27,0.07) 1.5px, transparent 1.5px)',
+          backgroundSize: '22px 22px',
+        }}
+      />
+
+      {/* Mascot — smaller on register to leave room for the form */}
+      <div className="animate-mascot-float animate-auth-enter relative z-10 mb-3">
+        <img
+          src="/mascot-main.jpg"
+          alt="Embark mascot"
+          className="w-40 h-40 object-contain"
+          style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.18))' }}
+        />
+      </div>
+
+      {/* Card */}
+      <div
+        className="animate-auth-enter-delay relative z-10 w-full max-w-sm bg-zinc-900 border-4 border-zinc-900 rounded-[6px] pt-6 pb-7 px-7"
+        style={{ boxShadow: '6px 6px 0 0 rgba(24,24,27,0.5)' }}
+      >
+        <p className="text-zinc-400 text-xs text-center mb-5 tracking-widest uppercase font-semibold">
+          Create your account
+        </p>
+
+        {error && (
+          <div className="mb-4 px-3 py-2 bg-red-900/50 border border-red-700 rounded-[4px] text-red-300 text-sm">
+            {error}
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">Embark</h1>
-          <p className="text-zinc-400 mt-1 text-sm">Client onboarding, leveled up.</p>
-        </div>
+        )}
 
-        {/* Card */}
-        <div className="bg-zinc-800 border-2 border-zinc-700 rounded-[4px] p-6 shadow-[4px_4px_0_0_#18181b]">
-          <h2 className="text-lg font-bold text-white mb-5">Create your account</h2>
-
-          {error && (
-            <div className="mb-4 px-3 py-2 bg-red-900/50 border border-red-700 rounded-[4px] text-red-300 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
-                Username <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                value={form.username}
-                onChange={set('username')}
-                required
-                autoFocus
-                className="w-full bg-zinc-900 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors"
-                placeholder="your_username"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
-                Email <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={set('email')}
-                required
-                className="w-full bg-zinc-900 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors"
-                placeholder="you@company.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
-                Phone <span className="text-zinc-500 text-xs">(optional)</span>
-              </label>
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={set('phone')}
-                className="w-full bg-zinc-900 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors"
-                placeholder="+1 555 000 0000"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
-                Password <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="password"
-                value={form.password}
-                onChange={set('password')}
-                required
-                className="w-full bg-zinc-900 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors"
-                placeholder="••••••••"
-              />
-              {strength && (
-                <div className="mt-1.5">
-                  <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full transition-all ${strengthConfig[strength].color} ${strengthConfig[strength].width}`} />
-                  </div>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Strength: <span className={strength === 'strong' ? 'text-green-400' : strength === 'ok' ? 'text-yellow-400' : 'text-red-400'}>{strengthConfig[strength].label}</span>
-                  </p>
+        <form onSubmit={handleSubmit} className="space-y-3.5">
+          <div>
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+              Username <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="text"
+              value={form.username}
+              onChange={set('username')}
+              required
+              autoFocus
+              className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors text-sm"
+              placeholder="your_username"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+              Email <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="email"
+              value={form.email}
+              onChange={set('email')}
+              required
+              className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors text-sm"
+              placeholder="you@company.com"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+              Phone <span className="text-zinc-500 text-xs normal-case font-normal">(optional)</span>
+            </label>
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={set('phone')}
+              className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors text-sm"
+              placeholder="+1 555 000 0000"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+              Password <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={set('password')}
+              required
+              className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors text-sm"
+              placeholder="••••••••"
+            />
+            {strength && (
+              <div className="mt-1.5">
+                <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${strengthConfig[strength].color} ${strengthConfig[strength].width}`} />
                 </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-1">
-                Confirm password <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="password"
-                value={form.confirm}
-                onChange={set('confirm')}
-                required
-                className="w-full bg-zinc-900 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-900 font-bold py-2.5 rounded-[4px] border-2 border-zinc-900 shadow-[3px_3px_0_0_#18181b] hover:shadow-[1px_1px_0_0_#18181b] hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-            >
-              Create account
-            </button>
-          </form>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Strength: <span className={strength === 'strong' ? 'text-green-400' : strength === 'ok' ? 'text-yellow-400' : 'text-red-400'}>{strengthConfig[strength].label}</span>
+                </p>
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 tracking-wide uppercase">
+              Confirm password <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="password"
+              value={form.confirm}
+              onChange={set('confirm')}
+              required
+              className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors text-sm"
+              placeholder="••••••••"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-900 font-black py-3 rounded-[4px] border-2 border-zinc-900 shadow-[4px_4px_0_0_#18181b] hover:shadow-[2px_2px_0_0_#18181b] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-sm tracking-wide mt-1"
+          >
+            Create account
+          </button>
+        </form>
 
-          <p className="mt-5 text-center text-sm text-zinc-400">
-            Already have an account?{' '}
-            <button
-              onClick={onShowLogin}
-              className="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors"
-            >
-              Sign in
-            </button>
-          </p>
-        </div>
+        <p className="mt-5 text-center text-sm text-zinc-500">
+          Already have an account?{' '}
+          <button
+            onClick={onShowLogin}
+            className="text-yellow-400 font-bold hover:text-yellow-300 transition-colors"
+          >
+            Sign in
+          </button>
+        </p>
       </div>
     </div>
   );
