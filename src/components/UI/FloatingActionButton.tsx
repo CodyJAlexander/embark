@@ -197,7 +197,7 @@ export function FloatingActionButton({ onAddClient }: FloatingActionButtonProps)
         {/* Main FAB */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`h-14 w-14 rounded-[4px] bg-yellow-400 border-2 border-zinc-900 shadow-[4px_4px_0_0_#18181b] text-zinc-900 flex items-center justify-center transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#18181b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
+          className={`h-14 w-14 rounded-[4px] bg-yellow-400 border-2 border-zinc-900 shadow-[4px_4px_0_0_#18181b] text-zinc-900 flex items-center justify-center transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_#18181b] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none btn-ripple ${
             isOpen ? 'rotate-[45deg]' : '-rotate-[2deg] hover:-rotate-[1deg]'
           }`}
         >

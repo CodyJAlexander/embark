@@ -1,3 +1,5 @@
+import type { JSONContent } from '@tiptap/core';
+
 export interface Service {
   id: string;
   name: string;
@@ -707,30 +709,12 @@ export interface FormSubmission {
 
 // ============ STUDIO (Notion-like workspace) ============
 
-export type BlockType =
-  | 'paragraph' | 'heading1' | 'heading2' | 'heading3'
-  | 'bullet' | 'numbered' | 'todo' | 'quote'
-  | 'divider' | 'code' | 'callout' | 'embed' | 'image';
-
-export interface StudioBlock {
-  id: string;
-  type: BlockType;
-  content: string;           // Plain text; URL for embed/image
-  checked?: boolean;         // todo blocks only
-  indent?: number;           // 0-3, bullet/numbered nesting
-  metadata?: {
-    calloutIcon?: string;    // emoji for callout
-    language?: string;       // code block language
-    embed?: EmbedMedia;      // reuses existing EmbedMedia type
-    imageAlt?: string;
-  };
-}
-
 export interface StudioPage {
   id: string;
   title: string;
   icon: string;              // emoji e.g. '📄'
-  blocks: StudioBlock[];
+  content: JSONContent;      // Tiptap ProseMirror JSON
+  parentId?: string | null;  // null = root page
   isPinned: boolean;
   createdAt: string;         // ISO
   updatedAt: string;         // ISO
@@ -747,7 +731,7 @@ export interface StudioTemplate {
   author: string;            // e.g. "Embark Team"
   authorRole: string;        // e.g. "Customer Success"
   icon: string;              // emoji
-  blocks: StudioBlock[];
+  content: JSONContent;      // Tiptap ProseMirror JSON
   isBuiltIn: boolean;
   createdAt: string;
   usageCount: number;

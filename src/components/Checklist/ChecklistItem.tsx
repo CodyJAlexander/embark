@@ -118,7 +118,7 @@ export function ChecklistItem({ clientId, item }: ChecklistItemProps) {
             flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
             ${
               item.completed
-                ? 'bg-green-500 border-zinc-900 dark:border-white text-white animate-checkbox-pop'
+                ? 'relative bg-green-500 border-zinc-900 dark:border-white text-white animate-checkbox-pop animate-checkbox-burst'
                 : 'border-zinc-300 dark:border-zinc-500 hover:border-green-500 hover:scale-110 duration-100'
             }
           `}

@@ -1,4 +1,5 @@
-import type { StudioPage, StudioBlock } from '../types';
+import type { JSONContent } from '@tiptap/core';
+import type { StudioPage } from '../types';
 
 /** Detect if the user is mid-way through a [[page]] mention. Returns the query string or null. */
 export function detectPageMention(value: string, cursor: number): string | null {
@@ -55,25 +56,24 @@ export function resolveReferences(text: string, pages: StudioPage[]): {
   return { resolved, referencedPages };
 }
 
-/** Convert StudioBlock[] to plain text for AI context injection. */
-export function blocksToPlainText(blocks: StudioBlock[]): string {
-  return blocks
-    .map((block) => {
-      switch (block.type) {
-        case 'heading1': return `# ${block.content}`;
-        case 'heading2': return `## ${block.content}`;
-        case 'heading3': return `### ${block.content}`;
-        case 'todo': return `- [${block.checked ? 'x' : ' '}] ${block.content}`;
-        case 'bullet': return `- ${block.content}`;
-        case 'numbered': return `1. ${block.content}`;
-        case 'quote': return `> ${block.content}`;
-        case 'callout': return `> 💡 ${block.content}`;
-        case 'code': return `\`\`\`\n${block.content}\n\`\`\``;
-        case 'divider': return '---';
-        case 'paragraph':
-        default: return block.content;
-      }
-    })
-    .filter(Boolean)
-    .join('\n');
+/** Convert Tiptap JSONContent to plain text for AI context injection. */
+export function tiptapToPlainText(content: JSONContent): string {
+  function nodeToText(node: JSONContent): string {
+    if (node.type === 'text') return node.text ?? '';
+    if (node.type === 'hardBreak') return '\n';
+    const children = (node.content ?? []).map(nodeToText).join('');
+    switch (node.type) {
+      case 'heading': return `${'#'.repeat(node.attrs?.level ?? 1)} ${children}`;
+      case 'bulletList': return children;
+      case 'orderedList': return children;
+      case 'listItem': return `- ${children}`;
+      case 'taskList': return children;
+      case 'taskItem': return `- [${node.attrs?.checked ? 'x' : ' '}] ${children}`;
+      case 'blockquote': return `> ${children}`;
+      case 'codeBlock': return `\`\`\`\n${children}\n\`\`\``;
+      case 'horizontalRule': return '---';
+      default: return children;
+    }
+  }
+  return (content.content ?? []).map(nodeToText).filter(Boolean).join('\n');
 }

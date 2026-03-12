@@ -33,7 +33,7 @@ export function Header({ onSelectClient, onMenuToggle, showMenuButton, onOpenCha
             )}
             {/* Mobile logo */}
             <div className="lg:hidden flex items-center gap-2">
-              <div className="w-8 h-8 rounded-[4px] border-2 border-yellow-400 overflow-hidden flex-shrink-0">
+              <div className="w-8 h-8 rounded-[4px] border-2 border-yellow-400 overflow-hidden flex-shrink-0 mascot-logo-glow">
                 <img
                   src="/mascot-clean.jpg"
                   alt="Embark"

@@ -10,7 +10,7 @@ import { useToast } from '../UI/Toast';
 import { BudChat } from '../Buds/BudChat';
 import { BudForm } from '../Buds/BudForm';
 import { MentionInput } from './MentionInput';
-import { resolveReferences, blocksToPlainText } from '../../utils/studioHelpers';
+import { resolveReferences, tiptapToPlainText } from '../../utils/studioHelpers';
 import type { Bud, BudType, AIConversation, AIMessage } from '../../types';
 
 interface AttachedFile {
@@ -206,7 +206,7 @@ export function AICenter() {
       // Build studio page context for system prompt
       const pageContext = referencedPages.length > 0
         ? '\n\n## Referenced Studio Pages\n' + referencedPages.map((p) =>
-            `### ${p.icon} ${p.title}\n${blocksToPlainText(p.blocks)}`
+            `### ${p.icon} ${p.title}\n${tiptapToPlainText(p.content)}`
           ).join('\n\n')
         : '';
 

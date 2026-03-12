@@ -174,7 +174,7 @@ export function RegisterPage({ onShowLogin }: RegisterPageProps) {
           </div>
           <button
             type="submit"
-            className="w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-900 font-black py-3 rounded-[4px] border-2 border-zinc-900 shadow-[4px_4px_0_0_#18181b] hover:shadow-[2px_2px_0_0_#18181b] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-sm tracking-wide mt-1"
+            className="w-full bg-yellow-400 hover:bg-yellow-300 text-zinc-900 font-black py-3 rounded-[4px] border-2 border-zinc-900 shadow-[4px_4px_0_0_#18181b] hover:shadow-[2px_2px_0_0_#18181b] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-sm tracking-wide mt-1 btn-ripple"
           >
             Create account
           </button>

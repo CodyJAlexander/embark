@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback } from 'react';
-import type { StudioPage, StudioBlock, StudioTemplateCategory } from '../../types';
-import { BlockList } from './blocks/BlockList';
+import type { JSONContent } from '@tiptap/core';
+import type { Editor } from '@tiptap/react';
+import type { StudioPage, StudioTemplateCategory } from '../../types';
+import { TiptapEditor } from './editor/TiptapEditor';
+import { AIPageActions } from './editor/AIPageActions';
 import { Modal } from '../UI/Modal';
 import { Button } from '../UI/Button';
-import { generateId } from '../../utils/helpers';
 
 const ICON_OPTIONS = ['📄', '📝', '📋', '🗓️', '💡', '🚀', '⭐', '🔥', '💼', '🎯', '📊', '🤝', '🧠', '🗺️', '✅'];
 
@@ -15,9 +17,13 @@ interface SaveTemplateData {
 
 interface Props {
   page: StudioPage;
-  onBack: () => void;
-  onUpdateBlocks: (pageId: string, blocks: StudioBlock[]) => void;
+  pages: StudioPage[];
+  onNavigate: (page: StudioPage) => void;
+  onUpdateContent: (pageId: string, content: JSONContent) => void;
   onUpdatePage: (id: string, data: Partial<StudioPage>) => void;
+  onDeletePage: (id: string) => void;
+  onTogglePin: (id: string) => void;
+  onMovePage: (id: string, parentId: string | null) => void;
   onSaveAsTemplate: (page: StudioPage, meta: SaveTemplateData) => void;
 }
 
@@ -30,8 +36,19 @@ const CATEGORIES: { value: StudioTemplateCategory; label: string }[] = [
   { value: 'custom', label: 'Custom' },
 ];
 
-export function PageEditor({ page, onBack, onUpdateBlocks, onUpdatePage, onSaveAsTemplate }: Props) {
-  const [localBlocks, setLocalBlocks] = useState<StudioBlock[]>(page.blocks);
+function buildPath(page: StudioPage, pages: StudioPage[]): StudioPage[] {
+  const path: StudioPage[] = [];
+  let current: StudioPage | undefined = page;
+  while (current) {
+    path.unshift(current);
+    current = current.parentId ? pages.find((p) => p.id === current!.parentId) : undefined;
+  }
+  return path;
+}
+
+export function PageEditor({
+  page, pages, onNavigate, onUpdateContent, onUpdatePage, onDeletePage, onTogglePin, onSaveAsTemplate,
+}: Props) {
   const [title, setTitle] = useState(page.title);
   const [icon, setIcon] = useState(page.icon);
   const [showIconPicker, setShowIconPicker] = useState(false);
@@ -40,18 +57,18 @@ export function PageEditor({ page, onBack, onUpdateBlocks, onUpdatePage, onSaveA
   const [templateName, setTemplateName] = useState(page.title);
   const [templateDesc, setTemplateDesc] = useState('');
   const [templateCategory, setTemplateCategory] = useState<StudioTemplateCategory>('custom');
-  const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [saved, setSaved] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const editorRef = useRef<Editor | null>(null);
 
-  const handleBlocksChange = useCallback((blocks: StudioBlock[]) => {
-    setLocalBlocks(blocks);
-    onUpdateBlocks(page.id, blocks);
-    // Brief save indicator
+  const breadcrumb = buildPath(page, pages);
+
+  const handleContentChange = useCallback((content: JSONContent) => {
+    onUpdateContent(page.id, content);
     if (saveIndicatorRef.current) clearTimeout(saveIndicatorRef.current);
     setSaved(false);
     saveIndicatorRef.current = setTimeout(() => setSaved(true), 600);
-  }, [page.id, onUpdateBlocks]);
+  }, [page.id, onUpdateContent]);
 
   const handleTitleBlur = useCallback(() => {
     onUpdatePage(page.id, { title });
@@ -64,33 +81,47 @@ export function PageEditor({ page, onBack, onUpdateBlocks, onUpdatePage, onSaveA
   }, [page.id, onUpdatePage]);
 
   const handleSaveTemplate = useCallback(() => {
-    onSaveAsTemplate({ ...page, title, icon, blocks: localBlocks }, {
+    const currentContent = editorRef.current?.getJSON() ?? page.content;
+    onSaveAsTemplate({ ...page, title, icon, content: currentContent }, {
       name: templateName,
       description: templateDesc,
       category: templateCategory,
     });
     setShowSaveModal(false);
     setShowMenu(false);
-  }, [page, title, icon, localBlocks, templateName, templateDesc, templateCategory, onSaveAsTemplate]);
+  }, [page, title, icon, templateName, templateDesc, templateCategory, onSaveAsTemplate]);
+
+  const handleInsertContent = useCallback((text: string) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.commands.insertContentAt(editor.state.doc.content.size, '\n' + text);
+  }, []);
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-4 pb-3 border-b-2 border-zinc-700">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition-colors font-medium"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Pages
-        </button>
-        <div className="flex-1" />
-        {saved && (
-          <span className="text-xs text-zinc-500 font-medium">Saved</span>
-        )}
-        <div className="relative" ref={menuRef}>
+    <div className="h-full flex flex-col p-6 overflow-hidden">
+      {/* Breadcrumb + Toolbar */}
+      <div className="flex items-center gap-3 mb-4 pb-3 border-b-2 border-zinc-700 flex-shrink-0">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1 text-sm text-zinc-500 flex-1 min-w-0 overflow-hidden">
+          {breadcrumb.map((p, i) => (
+            <span key={p.id} className="flex items-center gap-1 min-w-0">
+              {i > 0 && <span className="text-zinc-700 flex-shrink-0">/</span>}
+              <button
+                onClick={() => onNavigate(p)}
+                className={`hover:text-zinc-300 transition-colors truncate flex-shrink-0 ${
+                  i === breadcrumb.length - 1 ? 'text-zinc-300 font-medium pointer-events-none' : ''
+                }`}
+              >
+                {p.icon} {p.title || 'Untitled'}
+              </button>
+            </span>
+          ))}
+        </div>
+
+        {saved && <span className="text-xs text-zinc-500 font-medium flex-shrink-0">Saved</span>}
+
+        {/* Menu */}
+        <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowMenu((v) => !v)}
             className="p-1.5 rounded-[4px] text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
@@ -103,10 +134,29 @@ export function PageEditor({ page, onBack, onUpdateBlocks, onUpdatePage, onSaveA
           {showMenu && (
             <div className="absolute right-0 top-full mt-1 w-48 bg-zinc-900 border-2 border-zinc-700 rounded-[4px] shadow-[3px_3px_0_0_#18181b] z-20">
               <button
+                onClick={() => { onTogglePin(page.id); setShowMenu(false); }}
+                className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2"
+              >
+                <span>{page.isPinned ? '📌' : '📍'}</span>
+                {page.isPinned ? 'Unpin' : 'Pin'} Page
+              </button>
+              <button
                 onClick={() => { setShowSaveModal(true); setShowMenu(false); }}
                 className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2"
               >
                 <span>📁</span> Save as Template
+              </button>
+              <div className="border-t border-zinc-800" />
+              <button
+                onClick={() => {
+                  if (confirm('Delete this page?')) {
+                    onDeletePage(page.id);
+                    setShowMenu(false);
+                  }
+                }}
+                className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-zinc-800 hover:text-red-300 transition-colors flex items-center gap-2"
+              >
+                <span>🗑️</span> Delete Page
               </button>
             </div>
           )}
@@ -114,7 +164,7 @@ export function PageEditor({ page, onBack, onUpdateBlocks, onUpdatePage, onSaveA
       </div>
 
       {/* Page title + icon */}
-      <div className="flex items-start gap-3 mb-6">
+      <div className="flex items-start gap-3 mb-4 flex-shrink-0">
         <button
           onClick={() => setShowIconPicker((v) => !v)}
           className="text-3xl hover:bg-zinc-800 rounded-[4px] p-1 transition-colors relative"
@@ -145,31 +195,24 @@ export function PageEditor({ page, onBack, onUpdateBlocks, onUpdatePage, onSaveA
         />
       </div>
 
-      {/* Block editor */}
+      {/* AI Page Actions */}
+      <div className="flex-shrink-0">
+        <AIPageActions content={page.content} onInsertContent={handleInsertContent} />
+      </div>
+
+      {/* Tiptap Editor */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl">
-          <BlockList blocks={localBlocks} onChange={handleBlocksChange} />
-          {/* Click below last block to add paragraph */}
-          <div
-            className="h-24 cursor-text"
-            onClick={() => {
-              const last = localBlocks[localBlocks.length - 1];
-              if (last?.type === 'paragraph' && last.content === '') return;
-              const el = document.getElementById(`block-${last?.id}`) as HTMLElement | null;
-              if (el) { el.focus(); } else {
-                handleBlocksChange([...localBlocks, { id: generateId(), type: 'paragraph', content: '' }]);
-              }
-            }}
+          <TiptapEditor
+            content={page.content}
+            onChange={handleContentChange}
+            editorRef={editorRef}
           />
         </div>
       </div>
 
       {/* Save as Template modal */}
-      <Modal
-        isOpen={showSaveModal}
-        onClose={() => setShowSaveModal(false)}
-        title="Save as Template"
-      >
+      <Modal isOpen={showSaveModal} onClose={() => setShowSaveModal(false)} title="Save as Template">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-bold text-zinc-300 mb-1">Template Name</label>

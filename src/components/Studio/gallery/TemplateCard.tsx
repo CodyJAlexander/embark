@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function TemplateCard({ template, onUse, onDelete }: Props) {
-  const blockCount = template.blocks.length;
+  const blockCount = (template.content?.content ?? []).length;
 
   return (
     <div className="bg-zinc-900 border-2 border-zinc-700 rounded-[4px] p-4 flex flex-col gap-3 hover:border-zinc-500 transition-colors shadow-[2px_2px_0_0_#18181b]">
@@ -38,7 +38,7 @@ export function TemplateCard({ template, onUse, onDelete }: Props) {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-zinc-600 font-medium">{blockCount} blocks</span>
+        <span className="text-xs text-zinc-600 font-medium">{blockCount} sections</span>
         <Button size="sm" onClick={() => onUse(template.id)}>
           Use Template
         </Button>

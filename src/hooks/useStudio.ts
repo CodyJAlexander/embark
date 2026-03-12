@@ -1,7 +1,10 @@
 import { useCallback, useRef } from 'react';
-import type { StudioPage, StudioBlock } from '../types';
+import type { JSONContent } from '@tiptap/core';
+import type { StudioPage } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 import { generateId } from '../utils/helpers';
+
+const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
 
 export function useStudio() {
   const [pages, setPages] = useLocalStorage<StudioPage[]>('studio-pages', []);
@@ -17,7 +20,8 @@ export function useStudio() {
       id: generateId(),
       title,
       icon,
-      blocks: [{ id: generateId(), type: 'paragraph', content: '' }],
+      content: EMPTY_DOC,
+      parentId: null,
       isPinned: false,
       createdAt: now,
       updatedAt: now,
@@ -42,14 +46,20 @@ export function useStudio() {
     );
   }, [setPages]);
 
-  const updateBlocks = useCallback((pageId: string, blocks: StudioBlock[]) => {
+  const updateContent = useCallback((pageId: string, content: JSONContent) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPages((prev) =>
-        prev.map((p) => p.id === pageId ? { ...p, blocks, updatedAt: new Date().toISOString() } : p)
+        prev.map((p) => p.id === pageId ? { ...p, content, updatedAt: new Date().toISOString() } : p)
       );
     }, 500);
   }, [setPages]);
 
-  return { pages, addPage, createPage, updatePage, deletePage, togglePin, updateBlocks };
+  const movePage = useCallback((id: string, newParentId: string | null) => {
+    setPages((prev) =>
+      prev.map((p) => p.id === id ? { ...p, parentId: newParentId, updatedAt: new Date().toISOString() } : p)
+    );
+  }, [setPages]);
+
+  return { pages, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage };
 }

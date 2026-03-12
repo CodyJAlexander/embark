@@ -1,0 +1,147 @@
+/* Tiptap editor styles — neobrutalism-matched
+   Imported directly in TiptapEditor.tsx to bypass Tailwind v4's CSS scanner
+   which can choke on complex pseudo-selectors and attribute selectors. */
+
+.tiptap-editor .ProseMirror {
+  outline: none;
+  min-height: 200px;
+  padding-bottom: 4rem;
+}
+
+.tiptap-editor .ProseMirror h1 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #f4f4f5;
+  margin-bottom: 0.5rem;
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+.tiptap-editor .ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #f4f4f5;
+  margin-bottom: 0.5rem;
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e4e4e7;
+  margin-bottom: 0.25rem;
+  font-family: 'Syne', system-ui, sans-serif;
+}
+
+.tiptap-editor .ProseMirror p {
+  color: #d4d4d8;
+  margin-bottom: 0.25rem;
+}
+
+.tiptap-editor .ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  color: #d4d4d8;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap-editor .ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  color: #d4d4d8;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap-editor .ProseMirror li {
+  margin-bottom: 0.125rem;
+}
+
+.tiptap-editor .ProseMirror blockquote {
+  border-left: 4px solid #facc15;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #a1a1aa;
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor .ProseMirror code {
+  background: #27272a;
+  color: #4ade80;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.tiptap-editor .ProseMirror pre {
+  background: #09090b;
+  border: 1px solid #3f3f46;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #4ade80;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+}
+
+.tiptap-editor .ProseMirror pre code {
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+.tiptap-editor .ProseMirror hr {
+  border-color: #3f3f46;
+  margin: 0.75rem 0;
+}
+
+.tiptap-editor .ProseMirror a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.tiptap-editor .ProseMirror strong {
+  font-weight: 700;
+}
+
+.tiptap-editor .ProseMirror em {
+  font-style: italic;
+}
+
+/* Task list */
+.tiptap-editor .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li input[type="checkbox"] {
+  accent-color: #facc15;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+
+/* Placeholder text for empty nodes */
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before,
+.tiptap-editor .ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  color: #52525b;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

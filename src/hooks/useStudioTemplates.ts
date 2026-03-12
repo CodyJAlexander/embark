@@ -1,11 +1,52 @@
 import { useCallback } from 'react';
-import type { StudioTemplate, StudioPage, StudioBlock } from '../types';
+import type { JSONContent } from '@tiptap/core';
+import type { StudioTemplate, StudioPage } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 import { generateId } from '../utils/helpers';
 
-function b(type: StudioBlock['type'], content: string, extra?: Partial<StudioBlock>): StudioBlock {
-  return { id: generateId(), type, content, ...extra };
-}
+// ── JSONContent builder helpers ──────────────────────────────────────────────
+
+const h1 = (text: string): JSONContent => ({
+  type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text }],
+});
+const h2 = (text: string): JSONContent => ({
+  type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text }],
+});
+const p = (text = ''): JSONContent => ({
+  type: 'paragraph', content: text ? [{ type: 'text', text }] : [],
+});
+const ul = (...items: string[]): JSONContent => ({
+  type: 'bulletList',
+  content: items.map((text) => ({
+    type: 'listItem',
+    content: [{ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] }],
+  })),
+});
+const ol = (...items: string[]): JSONContent => ({
+  type: 'orderedList',
+  content: items.map((text) => ({
+    type: 'listItem',
+    content: [{ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] }],
+  })),
+});
+const tl = (...items: [string, boolean?][]): JSONContent => ({
+  type: 'taskList',
+  content: items.map(([text, checked = false]) => ({
+    type: 'taskItem',
+    attrs: { checked },
+    content: [{ type: 'paragraph', content: text ? [{ type: 'text', text }] : [] }],
+  })),
+});
+const bq = (text: string): JSONContent => ({
+  type: 'blockquote', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }],
+});
+const cb = (text: string): JSONContent => ({
+  type: 'codeBlock', attrs: { language: null }, content: [{ type: 'text', text }],
+});
+const hr = (): JSONContent => ({ type: 'horizontalRule' });
+const doc = (...nodes: JSONContent[]): JSONContent => ({ type: 'doc', content: nodes });
+
+// ── Built-in templates ───────────────────────────────────────────────────────
 
 const BUILT_IN_TEMPLATES: StudioTemplate[] = [
   {
@@ -19,22 +60,16 @@ const BUILT_IN_TEMPLATES: StudioTemplate[] = [
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'New Client Kickoff Agenda'),
-      b('heading2', 'Attendees'),
-      b('bullet', 'Client rep:'),
-      b('bullet', 'Account manager:'),
-      b('bullet', 'Delivery lead:'),
-      b('heading2', 'Goals'),
-      b('paragraph', 'Define the primary objectives for this engagement.'),
-      b('numbered', 'Align on project scope and timeline'),
-      b('numbered', 'Establish communication cadence'),
-      b('numbered', 'Confirm success metrics'),
-      b('heading2', 'Action Items'),
-      b('todo', 'Send meeting recap'),
-      b('todo', 'Share onboarding checklist with client'),
-      b('todo', 'Schedule next check-in'),
-    ],
+    content: doc(
+      h1('New Client Kickoff Agenda'),
+      h2('Attendees'),
+      ul('Client rep:', 'Account manager:', 'Delivery lead:'),
+      h2('Goals'),
+      p('Define the primary objectives for this engagement.'),
+      ol('Align on project scope and timeline', 'Establish communication cadence', 'Confirm success metrics'),
+      h2('Action Items'),
+      tl(['Send meeting recap'], ['Share onboarding checklist with client'], ['Schedule next check-in']),
+    ),
   },
   {
     id: 'builtin-90-day-plan',
@@ -47,33 +82,37 @@ const BUILT_IN_TEMPLATES: StudioTemplate[] = [
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', '90-Day Onboarding Plan'),
-      b('callout', 'This plan is a living document. Update it as milestones are hit.', { metadata: { calloutIcon: '💡' } }),
-      b('heading2', 'Day 1–30: Foundation'),
-      b('numbered', 'Complete environment setup'),
-      b('numbered', 'Deliver initial training sessions'),
-      b('numbered', 'Introduce key team members'),
-      b('numbered', 'Establish weekly check-in cadence'),
-      b('numbered', 'Review onboarding checklist progress'),
-      b('heading2', 'Day 31–60: Ramp'),
-      b('numbered', 'Complete advanced training'),
-      b('numbered', 'Run first QBR / progress review'),
-      b('numbered', 'Identify and resolve blockers'),
-      b('numbered', 'Gather NPS feedback'),
-      b('numbered', 'Finalize integrations'),
-      b('heading2', 'Day 61–90: Activate'),
-      b('numbered', 'Transition to steady-state support'),
-      b('numbered', 'Define expansion opportunities'),
-      b('numbered', 'Document lessons learned'),
-      b('numbered', 'Confirm renewal timeline'),
-      b('numbered', 'Schedule graduation meeting'),
-      b('divider', ''),
-      b('heading2', 'Success Metrics'),
-      b('todo', 'NPS score ≥ 8'),
-      b('todo', 'All checklist items complete'),
-      b('todo', 'Renewal conversation initiated'),
-    ],
+    content: doc(
+      h1('90-Day Onboarding Plan'),
+      bq('This plan is a living document. Update it as milestones are hit.'),
+      h2('Day 1–30: Foundation'),
+      ol(
+        'Complete environment setup',
+        'Deliver initial training sessions',
+        'Introduce key team members',
+        'Establish weekly check-in cadence',
+        'Review onboarding checklist progress',
+      ),
+      h2('Day 31–60: Ramp'),
+      ol(
+        'Complete advanced training',
+        'Run first QBR / progress review',
+        'Identify and resolve blockers',
+        'Gather NPS feedback',
+        'Finalize integrations',
+      ),
+      h2('Day 61–90: Activate'),
+      ol(
+        'Transition to steady-state support',
+        'Define expansion opportunities',
+        'Document lessons learned',
+        'Confirm renewal timeline',
+        'Schedule graduation meeting',
+      ),
+      hr(),
+      h2('Success Metrics'),
+      tl(['NPS score ≥ 8'], ['All checklist items complete'], ['Renewal conversation initiated']),
+    ),
   },
   {
     id: 'builtin-qbr',
@@ -86,25 +125,20 @@ const BUILT_IN_TEMPLATES: StudioTemplate[] = [
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'Quarterly Business Review'),
-      b('heading2', 'Last Quarter Recap'),
-      b('paragraph', 'Summarize what was delivered last quarter.'),
-      b('heading2', 'KPIs'),
-      b('todo', 'NPS score:'),
-      b('todo', 'Tasks completed:'),
-      b('todo', 'Milestones hit:'),
-      b('heading2', 'Wins'),
-      b('bullet', ''),
-      b('heading2', 'Challenges'),
-      b('bullet', ''),
-      b('heading2', 'Next Quarter Goals'),
-      b('numbered', ''),
-      b('numbered', ''),
-      b('numbered', ''),
-      b('todo', 'Goals approved by client'),
-      b('todo', 'Follow-up scheduled'),
-    ],
+    content: doc(
+      h1('Quarterly Business Review'),
+      h2('Last Quarter Recap'),
+      p('Summarize what was delivered last quarter.'),
+      h2('KPIs'),
+      tl(['NPS score:'], ['Tasks completed:'], ['Milestones hit:']),
+      h2('Wins'),
+      ul(''),
+      h2('Challenges'),
+      ul(''),
+      h2('Next Quarter Goals'),
+      ol('', '', ''),
+      tl(['Goals approved by client'], ['Follow-up scheduled']),
+    ),
   },
   {
     id: 'builtin-escalation-runbook',
@@ -117,22 +151,21 @@ const BUILT_IN_TEMPLATES: StudioTemplate[] = [
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'Client Escalation Runbook'),
-      b('callout', 'Use this runbook any time a client raises a P1 or P2 issue.', { metadata: { calloutIcon: '⚠️' } }),
-      b('heading2', 'Immediate Steps'),
-      b('numbered', 'Acknowledge the client within 1 hour'),
-      b('numbered', 'Log the escalation in the communication log'),
-      b('numbered', 'Notify delivery lead and account manager'),
-      b('numbered', 'Create a blocker task linked to the client'),
-      b('numbered', 'Schedule a call within 24 hours'),
-      b('heading2', 'Escalation Path'),
-      b('bullet', 'L1: Account Manager'),
-      b('bullet', 'L2: Delivery Lead'),
-      b('bullet', 'L3: Director of Customer Success'),
-      b('bullet', 'L4: VP of Operations'),
-      b('heading2', 'Email Template'),
-      b('code', `Subject: [Action Required] Update on your support case
+    content: doc(
+      h1('Client Escalation Runbook'),
+      bq('Use this runbook any time a client raises a P1 or P2 issue.'),
+      h2('Immediate Steps'),
+      ol(
+        'Acknowledge the client within 1 hour',
+        'Log the escalation in the communication log',
+        'Notify delivery lead and account manager',
+        'Create a blocker task linked to the client',
+        'Schedule a call within 24 hours',
+      ),
+      h2('Escalation Path'),
+      ul('L1: Account Manager', 'L2: Delivery Lead', 'L3: Director of Customer Success', 'L4: VP of Operations'),
+      h2('Email Template'),
+      cb(`Subject: [Action Required] Update on your support case
 
 Hi [Client Name],
 
@@ -141,8 +174,8 @@ Thank you for bringing this to our attention. We are actively working on a resol
 Please don't hesitate to reach out with any questions.
 
 Best,
-[Your Name]`, { metadata: { language: 'text' } }),
-    ],
+[Your Name]`),
+    ),
   },
   {
     id: 'builtin-onboarding-sop',
@@ -155,26 +188,32 @@ Best,
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'Onboarding SOP'),
-      b('heading2', 'Pre-Start Checklist'),
-      b('todo', 'SLA agreement signed'),
-      b('todo', 'Kickoff call scheduled'),
-      b('todo', 'Access credentials received'),
-      b('todo', 'Client folder created'),
-      b('todo', 'Internal team briefed'),
-      b('heading2', 'Week 1'),
-      b('numbered', 'Deliver welcome email and onboarding guide'),
-      b('numbered', 'Complete environment setup'),
-      b('numbered', 'First training session'),
-      b('numbered', 'Log initial communication'),
-      b('divider', ''),
-      b('heading2', 'Handoff Criteria'),
-      b('todo', 'All Week 1 tasks complete'),
-      b('todo', 'Client confirmed setup is working'),
-      b('todo', 'Steady-state support team introduced'),
-      b('todo', 'Next milestone date confirmed'),
-    ],
+    content: doc(
+      h1('Onboarding SOP'),
+      h2('Pre-Start Checklist'),
+      tl(
+        ['SLA agreement signed'],
+        ['Kickoff call scheduled'],
+        ['Access credentials received'],
+        ['Client folder created'],
+        ['Internal team briefed'],
+      ),
+      h2('Week 1'),
+      ol(
+        'Deliver welcome email and onboarding guide',
+        'Complete environment setup',
+        'First training session',
+        'Log initial communication',
+      ),
+      hr(),
+      h2('Handoff Criteria'),
+      tl(
+        ['All Week 1 tasks complete'],
+        ['Client confirmed setup is working'],
+        ['Steady-state support team introduced'],
+        ['Next milestone date confirmed'],
+      ),
+    ),
   },
   {
     id: 'builtin-meeting-notes',
@@ -187,23 +226,20 @@ Best,
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'Meeting Notes'),
-      b('heading2', 'Attendees'),
-      b('bullet', ''),
-      b('heading2', 'Agenda'),
-      b('numbered', ''),
-      b('numbered', ''),
-      b('numbered', ''),
-      b('heading2', 'Decisions'),
-      b('bullet', ''),
-      b('heading2', 'Action Items'),
-      b('todo', ''),
-      b('todo', ''),
-      b('heading2', 'Next Meeting'),
-      b('paragraph', 'Date: '),
-      b('paragraph', 'Agenda: '),
-    ],
+    content: doc(
+      h1('Meeting Notes'),
+      h2('Attendees'),
+      ul(''),
+      h2('Agenda'),
+      ol('', '', ''),
+      h2('Decisions'),
+      ul(''),
+      h2('Action Items'),
+      tl([''], ['']),
+      h2('Next Meeting'),
+      p('Date: '),
+      p('Agenda: '),
+    ),
   },
   {
     id: 'builtin-feature-request-log',
@@ -216,18 +252,16 @@ Best,
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'Feature Request Log'),
-      b('callout', 'Keep this log updated after every client call.', { metadata: { calloutIcon: '📌' } }),
-      b('heading2', 'Active Requests'),
-      b('numbered', ''),
-      b('numbered', ''),
-      b('heading2', 'Backlog'),
-      b('bullet', ''),
-      b('bullet', ''),
-      b('heading2', 'Shipped'),
-      b('bullet', ''),
-    ],
+    content: doc(
+      h1('Feature Request Log'),
+      bq('Keep this log updated after every client call.'),
+      h2('Active Requests'),
+      ol('', ''),
+      h2('Backlog'),
+      ul('', ''),
+      h2('Shipped'),
+      ul(''),
+    ),
   },
   {
     id: 'builtin-health-check',
@@ -240,24 +274,28 @@ Best,
     isBuiltIn: true,
     createdAt: '2026-01-01T00:00:00.000Z',
     usageCount: 0,
-    blocks: [
-      b('heading1', 'Client Health Check'),
-      b('heading2', 'Health Indicators'),
-      b('todo', 'NPS score collected (target ≥ 8)'),
-      b('todo', 'Key milestones on track'),
-      b('todo', 'No open escalations'),
-      b('todo', 'Renewal conversation initiated'),
-      b('heading2', 'Risk Flags'),
-      b('bullet', 'No response in 2+ weeks'),
-      b('bullet', 'Overdue tasks > 20%'),
-      b('bullet', 'Negative NPS or complaint'),
-      b('heading2', 'Actions'),
-      b('todo', 'Update health score in CRM'),
-      b('todo', 'Schedule follow-up if at-risk'),
-      b('todo', 'Notify account manager of findings'),
-    ],
+    content: doc(
+      h1('Client Health Check'),
+      h2('Health Indicators'),
+      tl(
+        ['NPS score collected (target ≥ 8)'],
+        ['Key milestones on track'],
+        ['No open escalations'],
+        ['Renewal conversation initiated'],
+      ),
+      h2('Risk Flags'),
+      ul('No response in 2+ weeks', 'Overdue tasks > 20%', 'Negative NPS or complaint'),
+      h2('Actions'),
+      tl(
+        ['Update health score in CRM'],
+        ['Schedule follow-up if at-risk'],
+        ['Notify account manager of findings'],
+      ),
+    ),
   },
 ];
+
+// ── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useStudioTemplates() {
   const [userTemplates, setUserTemplates] = useLocalStorage<StudioTemplate[]>('studio-templates', []);
@@ -271,23 +309,18 @@ export function useStudioTemplates() {
     const template = templates.find((t) => t.id === templateId);
     if (!template) throw new Error(`Template ${templateId} not found`);
 
-    // Deep-copy blocks with fresh IDs
     const now = new Date().toISOString();
     const newPage: StudioPage = {
       id: generateId(),
       title: template.name,
       icon: template.icon,
-      blocks: template.blocks.map((block) => ({
-        ...block,
-        id: generateId(),
-        metadata: block.metadata ? { ...block.metadata } : undefined,
-      })),
+      content: JSON.parse(JSON.stringify(template.content)) as JSONContent,
+      parentId: null,
       isPinned: false,
       createdAt: now,
       updatedAt: now,
     };
 
-    // Increment usageCount for user-created templates
     if (!template.isBuiltIn) {
       setUserTemplates((prev) =>
         prev.map((t) => t.id === templateId ? { ...t, usageCount: t.usageCount + 1 } : t)
@@ -310,7 +343,7 @@ export function useStudioTemplates() {
       author: 'Me',
       authorRole: 'Custom',
       icon: page.icon,
-      blocks: page.blocks.map((block) => ({ ...block, id: generateId() })),
+      content: JSON.parse(JSON.stringify(page.content)) as JSONContent,
       isBuiltIn: false,
       createdAt: new Date().toISOString(),
       usageCount: 0,

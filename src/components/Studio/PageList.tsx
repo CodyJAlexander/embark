@@ -125,7 +125,7 @@ interface PageRowProps {
 }
 
 function PageRow({ page, onOpen, onDelete, onTogglePin }: PageRowProps) {
-  const blockCount = page.blocks.filter((b) => b.content).length;
+  const blockCount = (page.content?.content ?? []).length;
   const updatedAt = new Date(page.updatedAt);
   const now = new Date();
   const diffMs = now.getTime() - updatedAt.getTime();
@@ -143,7 +143,7 @@ function PageRow({ page, onOpen, onDelete, onTogglePin }: PageRowProps) {
       <span className="text-xl shrink-0" onClick={onOpen}>{page.icon}</span>
       <div className="flex-1 min-w-0" onClick={onOpen}>
         <p className="text-sm font-bold text-zinc-100 truncate">{page.title || 'Untitled'}</p>
-        <p className="text-xs text-zinc-500">{blockCount} blocks · {timeLabel}</p>
+        <p className="text-xs text-zinc-500">{blockCount} sections · {timeLabel}</p>
       </div>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
