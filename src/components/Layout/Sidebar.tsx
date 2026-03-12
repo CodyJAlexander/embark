@@ -21,6 +21,7 @@ interface NavItem {
   view: View;
   label: string;
   icon: ReactNode;
+  sectionLabel?: string;
 }
 
 const navItems: NavItem[] = [
@@ -169,6 +170,16 @@ const navItems: NavItem[] = [
       </svg>
     ),
   },
+  {
+    view: 'studio',
+    label: 'Studio',
+    sectionLabel: 'WORKSPACE',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    ),
+  },
 ];
 
 const statusColors: Record<Client['status'], string> = {
@@ -240,7 +251,7 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
     >
       {/* Logo */}
       <div className="p-3 border-b-2 border-zinc-700 flex items-center justify-center gap-2">
-        <div className={`rounded-[4px] border-2 border-yellow-400 flex-shrink-0 overflow-hidden transition-all ${isCollapsed ? 'w-8 h-8' : 'w-9 h-9'}`}>
+        <div className={`rounded-[4px] border-2 border-yellow-400 flex-shrink-0 overflow-hidden transition-all mascot-logo-glow ${isCollapsed ? 'w-8 h-8' : 'w-9 h-9'}`}>
           <img
             src="/mascot-clean.jpg"
             alt="Embark"
@@ -258,27 +269,33 @@ export function Sidebar({ currentView, onViewChange, onSelectClient, isCollapsed
       {/* Navigation */}
       <nav className="p-2 border-b-2 border-zinc-700">
         {navItems.map((item) => (
-          <button
-            key={item.view}
-            onClick={() => onViewChange(item.view)}
-            className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-[4px] mb-1 transition-all duration-100 group ${
-              currentView === item.view
-                ? 'bg-yellow-400 text-zinc-900 font-black shadow-[2px_2px_0_0_#ffffff]'
-                : 'text-zinc-300 hover:text-white hover:bg-zinc-800 hover:translate-x-0.5 font-medium'
-            }`}
-            aria-current={currentView === item.view ? 'page' : undefined}
-            title={isCollapsed ? item.label : undefined}
-          >
-            {currentView === item.view && (
-              <span className="absolute left-0 top-0 bottom-0 w-1 bg-zinc-900 rounded-r-[2px]" />
+          <div key={item.view}>
+            {item.sectionLabel && (
+              isCollapsed
+                ? <div className="my-1 mx-2 border-t border-zinc-700" />
+                : <div className="px-3 pt-3 pb-1 text-xs font-black text-zinc-500 uppercase tracking-widest">{item.sectionLabel}</div>
             )}
-            <span className={`transition-transform duration-100 ${currentView === item.view ? 'scale-110' : ''}`}>
-              {item.icon}
-            </span>
-            {!isCollapsed && (
-              <span className="text-sm">{item.label}</span>
-            )}
-          </button>
+            <button
+              onClick={() => onViewChange(item.view)}
+              className={`relative w-full flex items-center gap-3 px-3 py-2.5 rounded-[4px] mb-1 transition-all duration-100 group ${
+                currentView === item.view
+                  ? 'bg-yellow-400 text-zinc-900 font-black shadow-[2px_2px_0_0_#ffffff]'
+                  : 'text-zinc-300 hover:text-white hover:bg-zinc-800 hover:translate-x-0.5 font-medium'
+              }`}
+              aria-current={currentView === item.view ? 'page' : undefined}
+              title={isCollapsed ? item.label : undefined}
+            >
+              {currentView === item.view && (
+                <span className="nav-indicator" />
+              )}
+              <span className={`transition-transform duration-100 ${currentView === item.view ? 'scale-110' : ''}`}>
+                {item.icon}
+              </span>
+              {!isCollapsed && (
+                <span className="text-sm">{item.label}</span>
+              )}
+            </button>
+          </div>
         ))}
       </nav>
 

@@ -327,7 +327,7 @@ export type ClientFormData = Omit<Client, 'id' | 'createdAt' | 'services' | 'che
   contacts?: ClientContact[];
 };
 
-export type View = 'dashboard' | 'clients' | 'templates' | 'tasks' | 'board' | 'planner' | 'notes' | 'ai' | 'marketplace' | 'team' | 'automations' | 'hall-of-heroes' | 'reports' | 'integrations' | 'focus' | 'forms';
+export type View = 'dashboard' | 'clients' | 'templates' | 'tasks' | 'board' | 'planner' | 'notes' | 'ai' | 'marketplace' | 'team' | 'automations' | 'hall-of-heroes' | 'reports' | 'integrations' | 'focus' | 'forms' | 'renewals' | 'studio';
 
 // Calendar Integration
 export type CalendarProvider = 'google' | 'microsoft';
@@ -703,4 +703,52 @@ export interface FormSubmission {
   clientId: string;
   submittedAt: string;
   data: Record<string, unknown>;
+}
+
+// ============ STUDIO (Notion-like workspace) ============
+
+export type BlockType =
+  | 'paragraph' | 'heading1' | 'heading2' | 'heading3'
+  | 'bullet' | 'numbered' | 'todo' | 'quote'
+  | 'divider' | 'code' | 'callout' | 'embed' | 'image';
+
+export interface StudioBlock {
+  id: string;
+  type: BlockType;
+  content: string;           // Plain text; URL for embed/image
+  checked?: boolean;         // todo blocks only
+  indent?: number;           // 0-3, bullet/numbered nesting
+  metadata?: {
+    calloutIcon?: string;    // emoji for callout
+    language?: string;       // code block language
+    embed?: EmbedMedia;      // reuses existing EmbedMedia type
+    imageAlt?: string;
+  };
+}
+
+export interface StudioPage {
+  id: string;
+  title: string;
+  icon: string;              // emoji e.g. '📄'
+  blocks: StudioBlock[];
+  isPinned: boolean;
+  createdAt: string;         // ISO
+  updatedAt: string;         // ISO
+}
+
+export type StudioTemplateCategory =
+  | 'onboarding' | 'planning' | 'meeting' | 'process' | 'reference' | 'custom';
+
+export interface StudioTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: StudioTemplateCategory;
+  author: string;            // e.g. "Embark Team"
+  authorRole: string;        // e.g. "Customer Success"
+  icon: string;              // emoji
+  blocks: StudioBlock[];
+  isBuiltIn: boolean;
+  createdAt: string;
+  usageCount: number;
 }

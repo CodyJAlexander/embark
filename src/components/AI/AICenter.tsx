@@ -5,9 +5,12 @@ import { useOllamaChat } from '../../hooks/useOllamaChat';
 import { useAISettings } from '../../hooks/useAISettings';
 import { useAIActions } from '../../hooks/useAIActions';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useStudio } from '../../hooks/useStudio';
 import { useToast } from '../UI/Toast';
 import { BudChat } from '../Buds/BudChat';
 import { BudForm } from '../Buds/BudForm';
+import { MentionInput } from './MentionInput';
+import { resolveReferences, blocksToPlainText } from '../../utils/studioHelpers';
 import type { Bud, BudType, AIConversation, AIMessage } from '../../types';
 
 interface AttachedFile {
@@ -64,6 +67,7 @@ export function AICenter() {
   const anthropicChat = useAnthropicChat(settings.anthropicApiKey || '');
   const ollamaChat = useOllamaChat(settings.ollamaEndpoint);
   const { executeAction, clients } = useAIActions();
+  const { pages: studioPages } = useStudio();
   const { showToast } = useToast();
 
   // Determine which chat to use based on provider
@@ -192,9 +196,19 @@ export function AICenter() {
     setInput('');
     setAttachedFiles([]);
 
+    // Resolve [[Page]] references and @date tokens
+    const { resolved: resolvedMessage, referencedPages } = resolveReferences(messageText, studioPages);
+
     try {
       // Build context from conversation history
       const conv = conversations.find((c) => c.id === convId);
+
+      // Build studio page context for system prompt
+      const pageContext = referencedPages.length > 0
+        ? '\n\n## Referenced Studio Pages\n' + referencedPages.map((p) =>
+            `### ${p.icon} ${p.title}\n${blocksToPlainText(p.blocks)}`
+          ).join('\n\n')
+        : '';
 
       const budConfig = {
         id: 'general',
@@ -223,7 +237,7 @@ For example:
 - "Log a call with the client about requirements" → Use the add_communication tool
 - "Show me the communication history" → Use the get_communication_log tool
 
-Be proactive and helpful. After completing an action, confirm what you did.`,
+Be proactive and helpful. After completing an action, confirm what you did.${pageContext}`,
         icon: '🤖',
         color: 'from-indigo-500 to-purple-600',
         createdAt: new Date().toISOString(),
@@ -233,14 +247,14 @@ Be proactive and helpful. After completing an action, confirm what you did.`,
 
       if (isOllama) {
         // Use Ollama for local AI processing
-        response = await ollamaChat.sendMessage(messageText, {
+        response = await ollamaChat.sendMessage(resolvedMessage, {
           bud: budConfig,
           messages: conv?.messages || [],
           allClients: clients.filter(c => !c.archived),
         }, settings.ollamaModel);
       } else {
         // Use Anthropic Claude API
-        response = await anthropicChat.sendMessage(messageText, {
+        response = await anthropicChat.sendMessage(resolvedMessage, {
           bud: budConfig,
           messages: conv?.messages || [],
           allClients: clients.filter(c => !c.archived),
@@ -706,15 +720,15 @@ Be proactive and helpful. After completing an action, confirm what you did.`,
                   </svg>
                 </button>
 
-                <textarea
+                <MentionInput
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={setInput}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ask anything... (attach images or files with the clip icon)"
+                  pages={studioPages}
+                  placeholder="Ask anything... type [[ for pages, @ for dates"
                   rows={1}
-                  className="flex-1 px-4 py-3 text-sm bg-white/50 dark:bg-white/10 rounded-xl border border-white/30 dark:border-white/10 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
-                  style={{ minHeight: '48px', maxHeight: '120px' }}
                   disabled={!isAIConfigured}
+                  className="flex-1 px-4 py-3 text-sm bg-white/50 dark:bg-white/10 rounded-xl border border-white/30 dark:border-white/10 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 resize-none"
                 />
                 <button
                   onClick={handleSendMessage}
