@@ -61,7 +61,7 @@ export function useClientsAPI() {
       api.patch(`/api/v1/clients/${clientId}`, {
         name: client.name, status: client.status,
         lifecycleStage: client.lifecycleStage,
-        industry: client.industry, website: client.website,
+        industry: client.account?.industry, website: client.account?.website,
         clientData: client,
       });
     }, 800));
@@ -91,7 +91,7 @@ export function useClientsAPI() {
     api.post('/api/v1/clients', {
       id, name: data.name, status: data.status,
       lifecycleStage: data.lifecycleStage,
-      industry: data.industry, website: data.website,
+      industry: data.account?.industry, website: data.account?.website,
       clientData: newClient,
     });
     return newClient;
