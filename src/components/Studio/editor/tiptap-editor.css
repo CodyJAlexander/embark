@@ -309,6 +309,17 @@
   background: rgba(250, 204, 21, 0.2);
 }
 
+/* ─── Comment highlights ──────────────────────── */
+.tiptap-editor .ProseMirror .comment-highlight {
+  background: rgba(250, 204, 21, 0.2);
+  border-bottom: 2px solid #facc15;
+  cursor: pointer;
+}
+
+.tiptap-editor .ProseMirror .comment-highlight:hover {
+  background: rgba(250, 204, 21, 0.35);
+}
+
 /* ─── Collaboration cursors ──────────────────────── */
 .tiptap-editor .collaboration-cursor__caret {
   border-left: 2px solid;

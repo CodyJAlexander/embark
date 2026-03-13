@@ -25,6 +25,7 @@ import { ToggleNode } from './ToggleNode';
 import { CalloutNode } from './CalloutNode';
 import { ClientMentionNode } from './ClientMentionNode';
 import { createClientMentionExtension } from './ClientMentionExtension';
+import { CommentMark } from './CommentMark';
 import { useClientContext } from '../../../context/ClientContext';
 
 const WS_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:3001')
@@ -45,9 +46,10 @@ interface Props {
   editorRef?: React.MutableRefObject<Editor | null>;
   onProviderReady?: (provider: WebsocketProvider | null) => void;
   onYdocReady?: (ydoc: Y.Doc | null) => void;
+  onAddComment?: (commentId: string) => void;
 }
 
-export function TiptapEditor({ pageId, currentUser, onChange, editable = true, editorRef, onProviderReady, onYdocReady }: Props) {
+export function TiptapEditor({ pageId, currentUser, onChange, editable = true, editorRef, onProviderReady, onYdocReady, onAddComment }: Props) {
   const { clients } = useClientContext();
   const clientsRef = useRef(clients);
   useEffect(() => { clientsRef.current = clients; }, [clients]);
@@ -111,6 +113,7 @@ export function TiptapEditor({ pageId, currentUser, onChange, editable = true, e
       SlashExtension,
       ClientMentionNode,
       createClientMentionExtension(clientsRef),
+      CommentMark,
       // Collaboration replaces StarterKit's document — must come after other extensions
       Collaboration.configure({ document: ydoc }),
       CollaborationCursor.configure({
@@ -158,7 +161,7 @@ export function TiptapEditor({ pageId, currentUser, onChange, editable = true, e
 
   return (
     <div className="tiptap-editor" onClick={handleChipClick}>
-      <BubbleToolbar editor={editor} />
+      <BubbleToolbar editor={editor} onAddComment={onAddComment} />
       <SlashMenu editor={editor} />
       <EditorContent editor={editor} />
     </div>

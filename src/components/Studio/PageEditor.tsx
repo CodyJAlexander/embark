@@ -14,6 +14,7 @@ import { tiptapToPlainText, tiptapToMarkdown } from '../../utils/studioHelpers';
 import { usePresence, type PresenceUser } from '../../hooks/usePresence';
 import { CursorPickerPopover, getCursorPrefs, type CursorPrefs } from './CursorPickerPopover';
 import { VersionHistoryPanel } from './VersionHistoryPanel';
+import { CommentsSidebar } from './CommentsSidebar';
 
 const ICON_OPTIONS = ['📄', '📝', '📋', '🗓️', '💡', '🚀', '⭐', '🔥', '💼', '🎯', '📊', '🤝', '🧠', '🗺️', '✅'];
 
@@ -103,6 +104,8 @@ export function PageEditor({
   });
   const [showToc, setShowToc] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [pendingCommentId, setPendingCommentId] = useState<string | null>(null);
   // liveContent tracks editor JSON immediately (not debounced) so TOC stays in sync
   const [liveContent, setLiveContent] = useState<JSONContent>(page.content);
   const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -345,6 +348,19 @@ export function PageEditor({
           </svg>
         </button>
 
+        {/* Comments toggle */}
+        <button
+          onClick={() => setShowComments((v) => !v)}
+          className={`p-1.5 rounded-[4px] transition-colors ${showComments ? 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
+          title="Comments"
+          aria-label="Toggle comments"
+          aria-pressed={showComments}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+
         {/* Keyboard shortcuts */}
         <button
           onClick={onOpenShortcuts}
@@ -474,6 +490,10 @@ export function PageEditor({
               editorRef={editorRef}
               onProviderReady={setProvider}
               onYdocReady={setYdoc}
+              onAddComment={(commentId) => {
+                setPendingCommentId(commentId);
+                setShowComments(true);
+              }}
             />
           </div>
         </div>
@@ -491,6 +511,27 @@ export function PageEditor({
               Y.applyUpdate(ydoc, decoded);
               setShowHistory(false);
             }}
+          />
+        )}
+        {showComments && (
+          <CommentsSidebar
+            pageId={page.id}
+            onClose={() => { setShowComments(false); setPendingCommentId(null); }}
+            onFocusComment={(commentId) => {
+              // Scroll/focus is best-effort; the highlight via CommentMark is always visible
+              editorRef.current?.commands.focus();
+              // Find the mark position and set selection there
+              const editor = editorRef.current;
+              if (!editor) return;
+              editor.state.doc.descendants((node, pos) => {
+                if (node.marks.some((m) => m.type.name === 'comment' && m.attrs.commentId === commentId)) {
+                  editor.commands.setTextSelection(pos);
+                  return false;
+                }
+              });
+            }}
+            pendingCommentId={pendingCommentId}
+            onCommentSubmitted={() => setPendingCommentId(null)}
           />
         )}
       </div>

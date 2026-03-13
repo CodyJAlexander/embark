@@ -29,9 +29,10 @@ interface Position { top: number; left: number }
 
 interface Props {
   editor: Editor | null;
+  onAddComment?: (commentId: string) => void;
 }
 
-export function BubbleToolbar({ editor }: Props) {
+export function BubbleToolbar({ editor, onAddComment }: Props) {
   const [pos, setPos] = useState<Position | null>(null);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
@@ -132,6 +133,17 @@ export function BubbleToolbar({ editor }: Props) {
           >
             🔗
           </ToolButton>
+          <button
+            onClick={() => {
+              const commentId = crypto.randomUUID();
+              editor.chain().focus().setMark('comment', { commentId }).run();
+              onAddComment?.(commentId);
+            }}
+            className="px-2 py-1 text-xs text-zinc-300 hover:text-yellow-400 hover:bg-zinc-700 rounded transition-colors"
+            title="Add comment"
+          >
+            💬
+          </button>
         </>
       )}
     </div>,

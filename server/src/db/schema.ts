@@ -237,6 +237,19 @@ export const studioPageHistory = pgTable('studio_page_history', {
   index('idx_studio_history_created').on(t.createdAt),
 ]);
 
+export const studioComments = pgTable('studio_comments', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  pageId:     uuid('page_id').notNull().references(() => studioPages.id, { onDelete: 'cascade' }),
+  userId:     uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  commentId:  text('comment_id').notNull(), // matches the mark's commentId attribute in the doc
+  body:       text('body').notNull(),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  parentId:   uuid('parent_id').references((): AnyPgColumn => studioComments.id, { onDelete: 'cascade' }),
+  createdAt:  timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_studio_comments_page').on(t.pageId),
+]);
+
 // ─── TEMPLATES ───────────────────────────────────────
 export const emailTemplates = pgTable('email_templates', {
   id:        uuid('id').primaryKey().defaultRandom(),
