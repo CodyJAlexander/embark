@@ -43,9 +43,10 @@ interface Props {
   onChange: (content: JSONContent) => void;
   editable?: boolean;
   editorRef?: React.MutableRefObject<Editor | null>;
+  providerRef?: React.MutableRefObject<WebsocketProvider | null>;
 }
 
-export function TiptapEditor({ pageId, currentUser, onChange, editable = true, editorRef }: Props) {
+export function TiptapEditor({ pageId, currentUser, onChange, editable = true, editorRef, providerRef }: Props) {
   const { clients } = useClientContext();
   const clientsRef = useRef(clients);
   useEffect(() => { clientsRef.current = clients; }, [clients]);
@@ -71,6 +72,12 @@ export function TiptapEditor({ pageId, currentUser, onChange, editable = true, e
       ydoc.destroy();
     };
   }, [provider, ydoc]);
+
+  // Expose provider instance via ref for parent components (e.g. presence/awareness)
+  useEffect(() => {
+    if (providerRef) providerRef.current = provider;
+    return () => { if (providerRef) providerRef.current = null; };
+  }, [provider, providerRef]);
 
   const editor = useEditor({
     extensions: [

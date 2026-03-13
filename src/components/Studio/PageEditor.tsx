@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
+import type { WebsocketProvider } from 'y-websocket';
 import type { StudioPage, StudioTemplateCategory } from '../../types';
 import { TiptapEditor, type CollabUser } from './editor/TiptapEditor';
 import { useAuth } from '../../context/AuthContext';
@@ -9,6 +10,8 @@ import { TableOfContents } from './editor/TableOfContents';
 import { Modal } from '../UI/Modal';
 import { Button } from '../UI/Button';
 import { tiptapToPlainText, tiptapToMarkdown } from '../../utils/studioHelpers';
+import { usePresence, type PresenceUser } from '../../hooks/usePresence';
+import { CursorPickerPopover, getCursorPrefs, type CursorPrefs } from './CursorPickerPopover';
 
 const ICON_OPTIONS = ['📄', '📝', '📋', '🗓️', '💡', '🚀', '⭐', '🔥', '💼', '🎯', '📊', '🤝', '🧠', '🗺️', '✅'];
 
@@ -44,15 +47,6 @@ interface Props {
   onOpenShortcuts: () => void;
 }
 
-function getCursorPrefs(): { color: string; emoji?: string } {
-  try {
-    const stored = localStorage.getItem('embark-cursor-prefs');
-    if (stored) return JSON.parse(stored);
-  } catch { /* ignore */ }
-  // Default: derive a color from the user's ID using a small palette
-  return { color: '#facc15' };
-}
-
 const CATEGORIES: { value: StudioTemplateCategory; label: string }[] = [
   { value: 'onboarding', label: 'Onboarding' },
   { value: 'meeting', label: 'Meeting' },
@@ -77,13 +71,16 @@ export function PageEditor({
   zenMode, onToggleZen, onOpenShortcuts,
 }: Props) {
   const { currentUser: authUser } = useAuth();
-  const cursorPrefs = getCursorPrefs();
+  const providerRef = useRef<WebsocketProvider | null>(null);
+  const [showCursorPicker, setShowCursorPicker] = useState(false);
+  const [cursorPrefs, setCursorPrefs] = useState<CursorPrefs>(getCursorPrefs);
   const collabUser: CollabUser = {
     id: authUser?.id ?? 'anonymous',
     name: authUser?.username ?? 'Anonymous',
     color: cursorPrefs.color,
     emoji: cursorPrefs.emoji,
   };
+  const presenceUsers = usePresence(providerRef.current);
 
   const [title, setTitle] = useState(page.title);
   const [icon, setIcon] = useState(page.icon);
@@ -179,6 +176,18 @@ export function PageEditor({
     setShowCoverPicker(false);
   }, [page.id, onUpdatePage]);
 
+  // Broadcast current user's cursor prefs via Yjs awareness
+  useEffect(() => {
+    const provider = providerRef.current;
+    if (!provider) return;
+    provider.awareness.setLocalStateField('user', {
+      name: collabUser.name,
+      color: collabUser.color,
+      emoji: collabUser.emoji,
+      avatarUrl: authUser?.avatarUrl,
+    });
+  }, [collabUser.name, collabUser.color, collabUser.emoji, authUser?.avatarUrl]);
+
   const gradientPickerJSX = (positionClass: string, onPick: (g: string) => void) => (
     <div ref={coverPickerRef} className={`absolute z-30 bg-zinc-900 border-2 border-zinc-700 rounded-[4px] p-2 shadow-[3px_3px_0_0_#18181b] flex gap-2 ${positionClass}`}>
       {COVER_GRADIENTS.map((g, i) => (
@@ -252,6 +261,47 @@ export function PageEditor({
               </button>
             </span>
           ))}
+        </div>
+
+        {/* Presence chips */}
+        {presenceUsers.length > 0 && (
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {presenceUsers.slice(0, 4).map((u: PresenceUser) => (
+              <div
+                key={u.clientId}
+                title={`${u.name}${u.emoji ? ' ' + u.emoji : ''} — editing now`}
+                className="w-6 h-6 rounded-full border-2 border-zinc-900 flex items-center justify-center text-xs font-bold text-zinc-900 flex-shrink-0"
+                style={{ background: u.color }}
+              >
+                {u.emoji || u.name.charAt(0).toUpperCase()}
+              </div>
+            ))}
+            {presenceUsers.length > 4 && (
+              <div className="w-6 h-6 rounded-full border-2 border-zinc-700 bg-zinc-800 flex items-center justify-center text-xs text-zinc-400 flex-shrink-0">
+                +{presenceUsers.length - 4}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Cursor picker button */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={() => setShowCursorPicker((v) => !v)}
+            title="Your cursor color"
+            className="w-6 h-6 rounded-full border-2 border-zinc-600 hover:border-zinc-400 transition-colors"
+            style={{ background: cursorPrefs.color }}
+            aria-label="Choose cursor color"
+          />
+          {showCursorPicker && (
+            <CursorPickerPopover
+              onClose={() => setShowCursorPicker(false)}
+              onChange={(p) => {
+                setCursorPrefs(p);
+                setShowCursorPicker(false);
+              }}
+            />
+          )}
         </div>
 
         {saved && <span className="text-xs text-zinc-500 font-medium flex-shrink-0">Saved</span>}
@@ -400,6 +450,7 @@ export function PageEditor({
               currentUser={collabUser}
               onChange={handleContentChange}
               editorRef={editorRef}
+              providerRef={providerRef}
             />
           </div>
         </div>
