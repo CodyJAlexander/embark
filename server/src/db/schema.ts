@@ -1,6 +1,6 @@
 import {
   pgTable, uuid, text, boolean, integer, numeric,
-  timestamp, date, jsonb, primaryKey, index, uniqueIndex,
+  timestamp, date, jsonb, primaryKey, index, uniqueIndex, AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -199,7 +199,7 @@ export const studioPages = pgTable('studio_pages', {
   title:     text('title').notNull().default('Untitled'),
   icon:      text('icon').notNull().default('📄'),
   content:   jsonb('content').notNull().default({ type: 'doc', content: [] }),
-  parentId:  uuid('parent_id').references((): any => studioPages.id, { onDelete: 'set null' }),
+  parentId:  uuid('parent_id').references((): AnyPgColumn => studioPages.id, { onDelete: 'set null' }),
   isPinned:  boolean('is_pinned').notNull().default(false),
   createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
