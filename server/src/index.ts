@@ -55,7 +55,7 @@ app.notFound((c) => c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }
 
 // ─── Error handler ────────────────────────────────────
 app.onError((err, c) => {
-  console.error(err);
+  console.error(`${c.req.method} ${c.req.path}`, err);
   return c.json({ data: null, error: 'Internal server error', code: 'INTERNAL_ERROR' }, 500);
 });
 
