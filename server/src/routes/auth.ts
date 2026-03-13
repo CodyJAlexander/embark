@@ -17,7 +17,7 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  email:    z.string().email(),
+  email:    z.string().min(1),   // accepts username or email
   password: z.string(),
 });
 
@@ -61,7 +61,9 @@ authRoutes.post('/login', async (c) => {
   }
 
   const { email, password } = parsed.data;
-  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const [user] = await db.select().from(users)
+    .where(or(eq(users.email, email), eq(users.username, email)))
+    .limit(1);
 
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return c.json({ data: null, error: 'Invalid credentials', code: 'UNAUTHORIZED' }, 401);
