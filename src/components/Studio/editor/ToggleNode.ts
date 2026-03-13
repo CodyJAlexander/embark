@@ -37,7 +37,7 @@ export const ToggleNode = Node.create({
         if (typeof getPos !== 'function') return;
         const newOpen = !currentAttrs.open;
         editor.commands.command(({ tr, dispatch }) => {
-          tr.setNodeMarkup(getPos(), undefined, { ...currentAttrs, open: newOpen });
+          tr.setNodeMarkup(getPos() as number, undefined, { ...currentAttrs, open: newOpen });
           if (dispatch) dispatch(tr);
           return true;
         });
