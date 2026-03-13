@@ -1,6 +1,6 @@
 import { createContext, useContext, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { useToast } from '../components/UI/Toast';
-import { useClients } from '../hooks/useClients';
+import { useClientsAPI as useClients } from '../hooks/useClientsAPI';
 import { useTemplates } from '../hooks/useTemplates';
 import { useTags } from '../hooks/useTags';
 import { useAutomations } from '../hooks/useAutomations';
