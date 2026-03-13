@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
 import type { StudioPage, StudioTemplateCategory } from '../../types';
@@ -18,6 +18,8 @@ const COVER_GRADIENTS = [
   'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
   'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
 ];
+
+const GRADIENT_NAMES = ['Purple', 'Pink-Red', 'Blue-Cyan', 'Green-Teal', 'Salmon-Yellow', 'Lavender'];
 
 interface SaveTemplateData {
   name: string;
@@ -80,6 +82,18 @@ export function PageEditor({
   });
   const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorRef = useRef<Editor | null>(null);
+  const coverPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showCoverPicker) return;
+    function handler(e: MouseEvent) {
+      if (coverPickerRef.current && !coverPickerRef.current.contains(e.target as Node)) {
+        setShowCoverPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showCoverPicker]);
 
   const breadcrumb = buildPath(page, pages);
 
@@ -133,6 +147,27 @@ export function PageEditor({
     setShowMenu(false);
   }, [page.content, title]);
 
+  const handlePickGradient = useCallback((g: string) => {
+    onUpdatePage(page.id, { coverUrl: g });
+    setCoverUrl(g);
+    setShowCoverPicker(false);
+  }, [page.id, onUpdatePage]);
+
+  const gradientPickerJSX = (positionClass: string, onPick: (g: string) => void) => (
+    <div ref={coverPickerRef} className={`absolute z-30 bg-zinc-900 border-2 border-zinc-700 rounded-[4px] p-2 shadow-[3px_3px_0_0_#18181b] flex gap-2 ${positionClass}`}>
+      {COVER_GRADIENTS.map((g, i) => (
+        <button
+          key={g}
+          title={GRADIENT_NAMES[i]}
+          aria-label={GRADIENT_NAMES[i]}
+          onClick={() => onPick(g)}
+          className="w-10 h-10 rounded-[4px] border-2 border-zinc-700 hover:border-yellow-400 transition-colors"
+          style={{ background: g }}
+        />
+      ))}
+    </div>
+  );
+
   const readingTime = Math.max(1, Math.round(wordCount / 200));
 
   return (
@@ -151,18 +186,7 @@ export function PageEditor({
               >
                 Change cover
               </button>
-              {showCoverPicker && (
-                <div className="absolute z-30 bottom-full mb-1 right-0 bg-zinc-900 border-2 border-zinc-700 rounded-[4px] p-2 shadow-[3px_3px_0_0_#18181b] flex gap-2">
-                  {COVER_GRADIENTS.map((g) => (
-                    <button
-                      key={g}
-                      onClick={() => { onUpdatePage(page.id, { coverUrl: g }); setCoverUrl(g); setShowCoverPicker(false); }}
-                      className="w-10 h-10 rounded-[4px] border-2 border-zinc-700 hover:border-yellow-400 transition-colors"
-                      style={{ background: g }}
-                    />
-                  ))}
-                </div>
-              )}
+              {showCoverPicker && gradientPickerJSX('bottom-full mb-1 right-0', handlePickGradient)}
             </div>
             <button
               onClick={() => { onUpdatePage(page.id, { coverUrl: undefined }); setCoverUrl(undefined); }}
@@ -180,18 +204,7 @@ export function PageEditor({
           >
             + Add cover
           </button>
-          {showCoverPicker && (
-            <div className="absolute z-30 top-full mt-1 left-6 bg-zinc-900 border-2 border-zinc-700 rounded-[4px] p-2 shadow-[3px_3px_0_0_#18181b] flex gap-2">
-              {COVER_GRADIENTS.map((g) => (
-                <button
-                  key={g}
-                  onClick={() => { onUpdatePage(page.id, { coverUrl: g }); setCoverUrl(g); setShowCoverPicker(false); }}
-                  className="w-10 h-10 rounded-[4px] border-2 border-zinc-700 hover:border-yellow-400 transition-colors"
-                  style={{ background: g }}
-                />
-              ))}
-            </div>
-          )}
+          {showCoverPicker && gradientPickerJSX('top-full mt-1 left-0', handlePickGradient)}
         </div>
       )}
 
