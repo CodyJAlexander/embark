@@ -24,6 +24,18 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     Sentry.captureException(error, { extra: { componentStack: errorInfo.componentStack } });
+
+    // Auto-reload once on chunk load failures (stale app shell after a new deploy).
+    // The sessionStorage flag prevents an infinite reload loop if the chunk is genuinely missing.
+    const isChunkError =
+      error.name === 'ChunkLoadError' ||
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Importing a module script failed');
+
+    if (isChunkError && !sessionStorage.getItem('embark-chunk-reload')) {
+      sessionStorage.setItem('embark-chunk-reload', '1');
+      window.location.reload();
+    }
   }
 
   handleReset = () => {
