@@ -23,11 +23,14 @@ export function StudioView() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setShowSearch(true);
-      } else if (e.key === 'F11') {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '\\') {
         e.preventDefault();
         setZenMode((v) => !v);
       } else if (e.key === 'Escape') {
-        setZenMode(false);
+        // Only exit zen mode if no modal/dialog is currently open
+        if (!document.querySelector('[role="dialog"]')) {
+          setZenMode(false);
+        }
       }
     };
     document.addEventListener('keydown', handler);

@@ -26,8 +26,8 @@ interface Props {
   onTogglePin: (id: string) => void;
   onMovePage: (id: string, parentId: string | null) => void;
   onSaveAsTemplate: (page: StudioPage, meta: SaveTemplateData) => void;
-  zenMode?: boolean;
-  onToggleZen?: () => void;
+  zenMode: boolean;
+  onToggleZen: () => void;
 }
 
 const CATEGORIES: { value: StudioTemplateCategory; label: string }[] = [
@@ -51,7 +51,7 @@ function buildPath(page: StudioPage, pages: StudioPage[]): StudioPage[] {
 
 export function PageEditor({
   page, pages, onNavigate, onUpdateContent, onUpdatePage, onDeletePage, onTogglePin, onSaveAsTemplate,
-  zenMode = false, onToggleZen,
+  zenMode, onToggleZen,
 }: Props) {
   const [title, setTitle] = useState(page.title);
   const [icon, setIcon] = useState(page.icon);
@@ -148,23 +148,22 @@ export function PageEditor({
         {saved && <span className="text-xs text-zinc-500 font-medium flex-shrink-0">Saved</span>}
 
         {/* Focus / Zen toggle */}
-        {onToggleZen && (
-          <button
-            onClick={onToggleZen}
-            className="p-1.5 rounded-[4px] text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex-shrink-0"
-            title={zenMode ? 'Exit focus mode (Esc)' : 'Focus mode (F11)'}
-          >
-            {zenMode ? (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-            )}
-          </button>
-        )}
+        <button
+          onClick={onToggleZen}
+          className="p-1.5 rounded-[4px] text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex-shrink-0"
+          title={zenMode ? 'Exit focus mode (Esc)' : 'Focus mode (Ctrl+\\)'}
+          aria-label={zenMode ? 'Exit focus mode' : 'Enter focus mode'}
+        >
+          {zenMode ? (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          )}
+        </button>
 
         {/* Menu */}
         <div className="relative flex-shrink-0">
