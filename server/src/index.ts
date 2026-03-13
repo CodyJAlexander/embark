@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import type { Server } from 'http';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -17,6 +18,7 @@ import { serviceRoutes } from './routes/services.js';
 import { tagRoutes } from './routes/tags.js';
 import { authMiddleware } from './middleware/auth.js';
 import { cfAccessMiddleware } from './middleware/cfAccess.js';
+import { attachYjsWebSocket } from './ws/yjsHandler.js';
 
 const app = new Hono<AppEnv>();
 
@@ -63,6 +65,7 @@ app.onError((err, c) => {
 
 const port = Number(process.env.PORT ?? 3001);
 console.log(`API server running on port ${port}`);
-serve({ fetch: app.fetch, port });
+const httpServer = serve({ fetch: app.fetch, port }) as unknown as Server;
+attachYjsWebSocket(httpServer);
 
 export default app;
