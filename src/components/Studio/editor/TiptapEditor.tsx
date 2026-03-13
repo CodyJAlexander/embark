@@ -13,6 +13,7 @@ import type { Editor } from '@tiptap/react';
 import { SlashExtension } from './SlashExtension';
 import { SlashMenu } from './SlashMenu';
 import { BubbleToolbar } from './BubbleToolbar';
+import { ToggleNode } from './ToggleNode';
 
 const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
 
@@ -41,6 +42,7 @@ export function TiptapEditor({ content, onChange, editable = true, editorRef }: 
       Image,
       Link.configure({ openOnClick: false }),
       Underline,
+      ToggleNode,
       SlashExtension,
     ],
     content: safeContent,

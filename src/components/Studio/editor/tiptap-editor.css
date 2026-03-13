@@ -136,6 +136,43 @@
   flex: 1;
 }
 
+/* Toggle block */
+.tiptap-editor .ProseMirror .toggle-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  margin: 0.25rem 0;
+  border-left: 2px solid #3f3f46;
+  padding-left: 0.5rem;
+}
+
+.tiptap-editor .ProseMirror .toggle-btn {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  color: #71717a;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0.2rem;
+  transition: color 0.1s;
+  user-select: none;
+}
+
+.tiptap-editor .ProseMirror .toggle-btn:hover {
+  color: #d4d4d8;
+}
+
+.tiptap-editor .ProseMirror .toggle-content {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Placeholder text for empty nodes */
 .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before,
 .tiptap-editor .ProseMirror .is-empty::before {

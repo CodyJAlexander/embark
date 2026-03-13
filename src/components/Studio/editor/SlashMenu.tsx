@@ -100,6 +100,18 @@ const COMMANDS: SlashCommand[] = [
       e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setHorizontalRule().run();
     },
   },
+  {
+    label: 'Toggle',
+    icon: '▶',
+    desc: 'Collapsible section',
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus()
+        .deleteRange({ from: $from.start(), to: $from.pos })
+        .insertContent({ type: 'toggleBlock', attrs: { open: true }, content: [{ type: 'paragraph' }] })
+        .run();
+    },
+  },
 ];
 
 interface Position { top: number; left: number }
