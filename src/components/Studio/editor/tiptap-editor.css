@@ -289,3 +289,22 @@
   min-width: 0;
   color: #d4d4d8;
 }
+
+/* Client mention chip */
+.tiptap-editor .ProseMirror .client-mention-chip {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(250, 204, 21, 0.1);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 0.85em;
+  color: #facc15;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.tiptap-editor .ProseMirror .client-mention-chip:hover {
+  background: rgba(250, 204, 21, 0.2);
+}

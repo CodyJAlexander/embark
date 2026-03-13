@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import './tiptap-editor.css';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -19,6 +19,9 @@ import { SlashMenu } from './SlashMenu';
 import { BubbleToolbar } from './BubbleToolbar';
 import { ToggleNode } from './ToggleNode';
 import { CalloutNode } from './CalloutNode';
+import { ClientMentionNode } from './ClientMentionNode';
+import { createClientMentionExtension } from './ClientMentionExtension';
+import { useClientContext } from '../../../context/ClientContext';
 
 const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
 
@@ -32,6 +35,10 @@ interface Props {
 export function TiptapEditor({ content, onChange, editable = true, editorRef }: Props) {
   // Guard against old localStorage data (blocks array format)
   const safeContent = (content && content.type === 'doc') ? content : EMPTY_DOC;
+
+  const { clients } = useClientContext();
+  const clientsRef = useRef(clients);
+  useEffect(() => { clientsRef.current = clients; }, [clients]);
 
   const editor = useEditor({
     extensions: [
@@ -54,6 +61,8 @@ export function TiptapEditor({ content, onChange, editable = true, editorRef }: 
       ToggleNode,
       CalloutNode,
       SlashExtension,
+      ClientMentionNode,
+      createClientMentionExtension(clientsRef),
     ],
     content: safeContent,
     editable,
@@ -71,8 +80,18 @@ export function TiptapEditor({ content, onChange, editable = true, editorRef }: 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function handleChipClick(e: React.MouseEvent) {
+    const chip = (e.target as HTMLElement).closest('[data-client-mention]');
+    if (chip) {
+      const clientId = chip.getAttribute('data-client-mention');
+      if (clientId) {
+        window.dispatchEvent(new CustomEvent('embark:navigate', { detail: { view: 'clients', clientId } }));
+      }
+    }
+  }
+
   return (
-    <div className="tiptap-editor">
+    <div className="tiptap-editor" onClick={handleChipClick}>
       <BubbleToolbar editor={editor} />
       <SlashMenu editor={editor} />
       <EditorContent editor={editor} />
