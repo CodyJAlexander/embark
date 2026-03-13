@@ -129,6 +129,14 @@ export function useStudio() {
     api.patch(`/api/v1/studio/pages/${id}`, { parentId: newParentId }).catch(console.error);
   }, []);
 
+  const saveSnapshot = useCallback(async (pageId: string, ydoc: import('yjs').Doc): Promise<void> => {
+    const { encodeStateAsUpdate } = await import('yjs');
+    const update = encodeStateAsUpdate(ydoc);
+    // Convert Uint8Array to base64
+    const snapshot = btoa(String.fromCharCode(...update));
+    await api.post(`/api/v1/studio/pages/${pageId}/history`, { snapshot });
+  }, []);
+
   const reorderPages = useCallback((orderedIds: string[]) => {
     setPages((prev) => {
       const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
@@ -145,5 +153,5 @@ export function useStudio() {
     });
   }, []);
 
-  return { pages, loading, error, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage, reorderPages };
+  return { pages, loading, error, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage, reorderPages, saveSnapshot };
 }

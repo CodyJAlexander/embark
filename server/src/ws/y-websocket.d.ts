@@ -6,4 +6,5 @@ declare module 'y-websocket/bin/utils' {
     req: IncomingMessage,
     opts?: { gc?: boolean; persistence?: unknown }
   ): void;
+  export const docs: Map<string, import('yjs').Doc>;
 }

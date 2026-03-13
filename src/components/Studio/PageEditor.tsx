@@ -12,6 +12,8 @@ import { Button } from '../UI/Button';
 import { tiptapToPlainText, tiptapToMarkdown } from '../../utils/studioHelpers';
 import { usePresence, type PresenceUser } from '../../hooks/usePresence';
 import { CursorPickerPopover, getCursorPrefs, type CursorPrefs } from './CursorPickerPopover';
+import { VersionHistoryPanel } from './VersionHistoryPanel';
+import { api } from '../../lib/api';
 
 const ICON_OPTIONS = ['📄', '📝', '📋', '🗓️', '💡', '🚀', '⭐', '🔥', '💼', '🎯', '📊', '🤝', '🧠', '🗺️', '✅'];
 
@@ -99,6 +101,7 @@ export function PageEditor({
     return text.split(/\s+/).filter(Boolean).length;
   });
   const [showToc, setShowToc] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   // liveContent tracks editor JSON immediately (not debounced) so TOC stays in sync
   const [liveContent, setLiveContent] = useState<JSONContent>(page.content);
   const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -324,6 +327,23 @@ export function PageEditor({
           </svg>
         </button>
 
+        {/* Version history toggle */}
+        <button
+          onClick={() => setShowHistory((v) => !v)}
+          className={`p-1.5 rounded-[4px] transition-colors ${
+            showHistory
+              ? 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+          }`}
+          title="Version history"
+          aria-label="Toggle version history"
+          aria-pressed={showHistory}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+
         {/* Keyboard shortcuts */}
         <button
           onClick={onOpenShortcuts}
@@ -457,6 +477,19 @@ export function PageEditor({
         </div>
         {showToc && (
           <TableOfContents content={liveContent} editorScrollRef={editorScrollRef} />
+        )}
+        {showHistory && (
+          <VersionHistoryPanel
+            pageId={page.id}
+            onClose={() => setShowHistory(false)}
+            onRestore={(_snapshot) => {
+              // Phase 5: placeholder restore — confirm then patch page with current editor JSON
+              if (confirm('Restore this version? The page will reload.')) {
+                api.patch(`/api/v1/studio/pages/${page.id}`, { content: page.content });
+                setShowHistory(false);
+              }
+            }}
+          />
         )}
       </div>
 

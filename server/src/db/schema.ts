@@ -226,6 +226,17 @@ export const studioTemplates = pgTable('studio_templates', {
   createdAt:   timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const studioPageHistory = pgTable('studio_page_history', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  pageId:    uuid('page_id').notNull().references(() => studioPages.id, { onDelete: 'cascade' }),
+  userId:    uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  snapshot:  text('snapshot').notNull(), // base64-encoded Yjs state vector
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_studio_history_page').on(t.pageId),
+  index('idx_studio_history_created').on(t.createdAt),
+]);
+
 // ─── TEMPLATES ───────────────────────────────────────
 export const emailTemplates = pgTable('email_templates', {
   id:        uuid('id').primaryKey().defaultRandom(),
