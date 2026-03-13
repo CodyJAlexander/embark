@@ -28,7 +28,7 @@ import { createClientMentionExtension } from './ClientMentionExtension';
 import { useClientContext } from '../../../context/ClientContext';
 
 const WS_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:3001')
-  .replace(/^http/, 'ws');
+  .replace(/^http/i, 'ws');
 
 export interface CollabUser {
   id: string;
