@@ -41,6 +41,7 @@ export const clients = pgTable('clients', {
   companySize:      text('company_size'),
   website:          text('website'),
   healthScoreTotal: integer('health_score_total').notNull().default(0),
+  clientData:       jsonb('client_data').notNull().default({}),
   assignedTo:       uuid('assigned_to').references(() => users.id, { onDelete: 'set null' }),
   createdBy:        uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt:        timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

@@ -14,6 +14,7 @@ import type { AppEnv } from '../types.js';
 export const clientRoutes = new Hono<AppEnv>();
 
 const clientSchema = z.object({
+  id:             z.string().uuid().optional(),   // client-generated UUID
   name:           z.string().min(1),
   status:         z.string().optional(),
   lifecycleStage: z.string().optional(),
@@ -21,21 +22,23 @@ const clientSchema = z.object({
   companySize:    z.string().optional(),
   website:        z.string().optional(),
   assignedTo:     z.string().uuid().optional(),
+  clientData:     z.record(z.unknown()).optional(),
 });
 
 // ─── List clients ─────────────────────────────────────
 clientRoutes.get('/', async (c) => {
+  const userId = c.get('userId');
   const { page, limit, offset } = paginate(c.req.query());
   const { status, lifecycle, assignedTo, search } = c.req.query();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [];
+  const conditions: any[] = [eq(clients.createdBy, userId)];
   if (status)     conditions.push(eq(clients.status, status));
   if (lifecycle)  conditions.push(eq(clients.lifecycleStage, lifecycle));
   if (assignedTo) conditions.push(eq(clients.assignedTo, assignedTo));
   if (search)     conditions.push(ilike(clients.name, `%${search}%`));
 
-  const where = conditions.length > 0 ? and(...conditions) : undefined;
+  const where = and(...conditions);
 
   const [rows, countResult] = await Promise.all([
     db.select().from(clients).where(where).limit(limit).offset(offset)
@@ -49,36 +52,41 @@ clientRoutes.get('/', async (c) => {
 
 // ─── Get client ───────────────────────────────────────
 clientRoutes.get('/:id', async (c) => {
+  const userId = c.get('userId');
   const [client] = await db.select().from(clients)
-    .where(eq(clients.id, c.req.param('id'))).limit(1);
+    .where(and(eq(clients.id, c.req.param('id')), eq(clients.createdBy, userId))).limit(1);
   if (!client) return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
   return c.json({ data: client, error: null });
 });
 
 // ─── Create client ────────────────────────────────────
 clientRoutes.post('/', async (c) => {
+  const userId = c.get('userId');
   const body = await c.req.json().catch(() => null);
   const parsed = clientSchema.safeParse(body);
   if (!parsed.success) {
     return c.json({ data: null, error: 'Validation failed', code: 'VALIDATION_ERROR',
       details: parsed.error.flatten() }, 422);
   }
+  const { id, clientData, ...rest } = parsed.data;
   const [client] = await db.insert(clients)
-    .values({ ...parsed.data, createdBy: c.get('userId') })
+    .values({ ...(id ? { id } : {}), ...rest, clientData: clientData ?? {}, createdBy: userId })
     .returning();
   return c.json({ data: client, error: null }, 201);
 });
 
 // ─── Update client ────────────────────────────────────
 clientRoutes.patch('/:id', async (c) => {
+  const userId = c.get('userId');
   const body = await c.req.json().catch(() => null);
   const parsed = clientSchema.partial().safeParse(body);
   if (!parsed.success) {
     return c.json({ data: null, error: 'Validation failed', code: 'VALIDATION_ERROR' }, 422);
   }
+  const { id: _id, ...rest } = parsed.data;
   const [client] = await db.update(clients)
-    .set({ ...parsed.data, updatedAt: new Date() })
-    .where(eq(clients.id, c.req.param('id')))
+    .set({ ...rest, updatedAt: new Date() })
+    .where(and(eq(clients.id, c.req.param('id')), eq(clients.createdBy, userId)))
     .returning();
   if (!client) return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
   return c.json({ data: client, error: null });
@@ -86,8 +94,10 @@ clientRoutes.patch('/:id', async (c) => {
 
 // ─── Delete client ────────────────────────────────────
 clientRoutes.delete('/:id', async (c) => {
+  const userId = c.get('userId');
   const [deleted] = await db.delete(clients)
-    .where(eq(clients.id, c.req.param('id'))).returning({ id: clients.id });
+    .where(and(eq(clients.id, c.req.param('id')), eq(clients.createdBy, userId)))
+    .returning({ id: clients.id });
   if (!deleted) return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
   return c.json({ data: { id: deleted.id }, error: null });
 });
