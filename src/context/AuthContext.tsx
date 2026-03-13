@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { StoredUser } from '../types';
 import { api, setToken, clearToken } from '../lib/api';
+import { migrateClientsFromLocalStorage } from '../utils/migrateLocalStorage';
 
 export interface RegisterData {
   username: string;
@@ -83,6 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setToken(response.data.token);
     setCurrentUser(mapApiUser(response.data.user));
+    // One-time migration: port localStorage clients to API on first login
+    if (!localStorage.getItem('embark-migrated-clients')) {
+      migrateClientsFromLocalStorage().catch(() => {/* non-fatal */});
+    }
   }, []);
 
   const register = useCallback(async (data: RegisterData): Promise<void> => {
