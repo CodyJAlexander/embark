@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Editor } from '@tiptap/react';
 
@@ -89,27 +89,91 @@ interface Props {
 
 export function SlashMenu({ editor }: Props) {
   const [pos, setPos] = useState<Position | null>(null);
+  const [filterText, setFilterText] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  // Derive filtered commands from filterText
+  const filtered = filterText
+    ? COMMANDS.filter((cmd) => cmd.label.toLowerCase().includes(filterText.toLowerCase()))
+    : COMMANDS;
+
+  // Reset selectedIndex when filterText changes
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [filterText]);
+
+  // Scroll selected item into view
+  useEffect(() => {
+    const el = itemRefs.current[selectedIndex];
+    if (el) el.scrollIntoView({ block: 'nearest' });
+  }, [selectedIndex]);
+
+  // Watch editor transactions to show/hide menu and update filterText
   useEffect(() => {
     if (!editor) return;
 
     const update = () => {
       const { $from } = editor.state.selection;
       const text = $from.parent.textContent;
-      if (text === '/') {
+      if (text.startsWith('/')) {
         const coords = editor.view.coordsAtPos($from.pos);
         setPos({ top: coords.bottom + 6, left: coords.left });
+        setFilterText(text.slice(1)); // everything after the leading '/'
       } else {
         setPos(null);
+        setFilterText('');
       }
     };
 
+    const onBlur = () => {
+      setPos(null);
+      setFilterText('');
+    };
+
     editor.on('transaction', update);
-    editor.on('blur', () => setPos(null));
+    editor.on('blur', onBlur);
     return () => {
       editor.off('transaction', update);
+      editor.off('blur', onBlur);
     };
   }, [editor]);
+
+  // Keyboard navigation via document listener when menu is open
+  useEffect(() => {
+    if (!pos || !editor) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedIndex((i) => (filtered.length === 0 ? 0 : (i + 1) % filtered.length));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelectedIndex((i) => (filtered.length === 0 ? 0 : (i - 1 + filtered.length) % filtered.length));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        const cmd = filtered[selectedIndex];
+        if (cmd) {
+          cmd.action(editor);
+          setPos(null);
+          setFilterText('');
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        setPos(null);
+        setFilterText('');
+      }
+    };
+
+    document.addEventListener('keydown', handler, true);
+    return () => {
+      document.removeEventListener('keydown', handler, true);
+    };
+  }, [pos, editor, filtered, selectedIndex]);
 
   if (!editor || !pos) return null;
 
@@ -122,25 +186,36 @@ export function SlashMenu({ editor }: Props) {
       <div className="px-3 py-1.5 border-b border-zinc-800">
         <span className="text-xs font-black text-zinc-500 uppercase tracking-widest">Commands</span>
       </div>
-      {COMMANDS.map((cmd) => (
-        <button
-          key={cmd.label}
-          onMouseDown={(e) => {
-            e.preventDefault();
-            cmd.action(editor);
-            setPos(null);
-          }}
-          className="w-full text-left flex items-center gap-2.5 px-3 py-2 hover:bg-zinc-800 transition-colors"
-        >
-          <span className="w-7 h-7 bg-zinc-800 border border-zinc-700 rounded flex items-center justify-center text-xs font-black text-zinc-300 flex-shrink-0">
-            {cmd.icon}
-          </span>
-          <div className="min-w-0">
-            <div className="text-sm font-bold text-zinc-200">{cmd.label}</div>
-            <div className="text-xs text-zinc-500 truncate">{cmd.desc}</div>
-          </div>
-        </button>
-      ))}
+      {filtered.length === 0 ? (
+        <div className="px-3 py-4 text-sm text-zinc-500 text-center">No results</div>
+      ) : (
+        filtered.map((cmd, i) => (
+          <button
+            key={cmd.label}
+            ref={(el) => { itemRefs.current[i] = el; }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              cmd.action(editor);
+              setPos(null);
+              setFilterText('');
+            }}
+            onMouseEnter={() => setSelectedIndex(i)}
+            className={`w-full text-left flex items-center gap-2.5 px-3 py-2 transition-colors ${
+              i === selectedIndex
+                ? 'bg-zinc-800 border-l-2 border-yellow-400'
+                : 'border-l-2 border-transparent hover:bg-zinc-800'
+            }`}
+          >
+            <span className="w-7 h-7 bg-zinc-800 border border-zinc-700 rounded flex items-center justify-center text-xs font-black text-zinc-300 flex-shrink-0">
+              {cmd.icon}
+            </span>
+            <div className="min-w-0">
+              <div className="text-sm font-bold text-zinc-200">{cmd.label}</div>
+              <div className="text-xs text-zinc-500 truncate">{cmd.desc}</div>
+            </div>
+          </button>
+        ))
+      )}
     </div>,
     document.body
   );
