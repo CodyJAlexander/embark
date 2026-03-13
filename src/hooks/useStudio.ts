@@ -1,15 +1,26 @@
-import { useCallback, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import type { StudioPage } from '../types';
-import { useLocalStorage } from './useLocalStorage';
-import { generateId } from '../utils/helpers';
+import { api } from '../lib/api';
 
 const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
 
-/**
- * Collects the IDs of all descendants of a given page (BFS traversal).
- * The root ID itself is NOT included — callers should add it separately.
- */
+/** Map an API row (snake_case or camelCase from Drizzle) to our StudioPage shape */
+function rowToPage(row: Record<string, unknown>): StudioPage {
+  return {
+    id:        row.id as string,
+    title:     (row.title as string) ?? 'Untitled',
+    icon:      (row.icon as string) ?? '📄',
+    content:   (row.content as JSONContent) ?? EMPTY_DOC,
+    parentId:  (row.parentId as string | null) ?? null,
+    isPinned:  (row.isPinned as boolean) ?? false,
+    sortOrder: row.sortOrder as number | undefined,
+    coverUrl:  row.coverUrl as string | undefined,
+    createdAt: row.createdAt as string,
+    updatedAt: row.updatedAt as string,
+  };
+}
+
 export function collectDescendantIds(id: string, pages: StudioPage[]): string[] {
   const childMap = new Map<string, string[]>();
   for (const p of pages) {
@@ -17,7 +28,6 @@ export function collectDescendantIds(id: string, pages: StudioPage[]): string[] 
     if (!childMap.has(key)) childMap.set(key, []);
     childMap.get(key)!.push(p.id);
   }
-
   const result: string[] = [];
   const queue: string[] = [id];
   let head = 0;
@@ -32,82 +42,93 @@ export function collectDescendantIds(id: string, pages: StudioPage[]): string[] 
 }
 
 export function useStudio() {
-  const [pages, setPages] = useLocalStorage<StudioPage[]>('studio-pages', []);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pages, setPages] = useState<StudioPage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const debounceRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Load pages from API on mount
+  useEffect(() => {
+    api.get<Record<string, unknown>[]>('/api/v1/studio/pages').then((res) => {
+      if (res.data) setPages(res.data.map(rowToPage));
+    }).finally(() => setLoading(false));
+  }, []);
 
   const addPage = useCallback((page: StudioPage) => {
     setPages((prev) => [page, ...prev]);
-  }, [setPages]);
+  }, []);
 
-  const createPage = useCallback((title = 'Untitled', icon = '📄'): StudioPage => {
-    const now = new Date().toISOString();
-    const newPage: StudioPage = {
-      id: generateId(),
-      title,
-      icon,
-      content: EMPTY_DOC,
-      parentId: null,
-      isPinned: false,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setPages((prev) => [newPage, ...prev]);
-    return newPage;
-  }, [setPages]);
+  const createPage = useCallback(async (title = 'Untitled', icon = '📄'): Promise<StudioPage> => {
+    const res = await api.post<Record<string, unknown>>('/api/v1/studio/pages', { title, icon });
+    if (!res.data) throw new Error(res.error ?? 'Failed to create page');
+    const page = rowToPage(res.data);
+    setPages((prev) => [page, ...prev]);
+    return page;
+  }, []);
 
   const updatePage = useCallback((id: string, data: Partial<StudioPage>) => {
+    // Optimistic update
     setPages((prev) =>
       prev.map((p) => p.id === id ? { ...p, ...data, updatedAt: new Date().toISOString() } : p)
     );
-  }, [setPages]);
+    api.patch(`/api/v1/studio/pages/${id}`, data).catch(console.error);
+  }, []);
 
   const deletePage = useCallback((id: string) => {
     setPages((prev) => {
       const toDelete = new Set([id, ...collectDescendantIds(id, prev)]);
       return prev.filter((p) => !toDelete.has(p.id));
     });
-  }, [setPages]);
+    api.delete(`/api/v1/studio/pages/${id}`).catch(console.error);
+  }, []);
 
   const togglePin = useCallback((id: string) => {
     setPages((prev) =>
       prev.map((p) => {
         if (p.id !== id) return p;
         const nowPinned = !p.isPinned;
-        return {
-          ...p,
-          isPinned: nowPinned,
-          sortOrder: nowPinned ? undefined : p.sortOrder,
-          updatedAt: new Date().toISOString(),
-        };
+        const updated = { ...p, isPinned: nowPinned, sortOrder: nowPinned ? undefined : p.sortOrder, updatedAt: new Date().toISOString() };
+        api.patch(`/api/v1/studio/pages/${id}`, { isPinned: nowPinned }).catch(console.error);
+        return updated;
       })
     );
-  }, [setPages]);
+  }, []);
 
   const updateContent = useCallback((pageId: string, content: JSONContent) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setPages((prev) =>
-        prev.map((p) => p.id === pageId ? { ...p, content, updatedAt: new Date().toISOString() } : p)
-      );
-    }, 500);
-  }, [setPages]);
+    // Optimistic update immediately
+    setPages((prev) =>
+      prev.map((p) => p.id === pageId ? { ...p, content, updatedAt: new Date().toISOString() } : p)
+    );
+    // Debounced API sync (500ms)
+    const existing = debounceRef.current.get(pageId);
+    if (existing) clearTimeout(existing);
+    debounceRef.current.set(pageId, setTimeout(() => {
+      api.patch(`/api/v1/studio/pages/${pageId}`, { content }).catch(console.error);
+      debounceRef.current.delete(pageId);
+    }, 500));
+  }, []);
 
   const movePage = useCallback((id: string, newParentId: string | null) => {
     setPages((prev) =>
       prev.map((p) => p.id === id ? { ...p, parentId: newParentId, updatedAt: new Date().toISOString() } : p)
     );
-  }, [setPages]);
+    api.patch(`/api/v1/studio/pages/${id}`, { parentId: newParentId }).catch(console.error);
+  }, []);
 
   const reorderPages = useCallback((orderedIds: string[]) => {
     setPages((prev) => {
       const orderMap = new Map(orderedIds.map((id, i) => [id, i]));
-      return prev.map((p) =>
+      const updated = prev.map((p) =>
         orderMap.has(p.id)
           ? { ...p, sortOrder: orderMap.get(p.id)!, updatedAt: new Date().toISOString() }
           : p
       );
+      // Batch update sortOrders
+      orderedIds.forEach((id, i) => {
+        api.patch(`/api/v1/studio/pages/${id}`, { sortOrder: i }).catch(console.error);
+      });
+      return updated;
     });
-  }, [setPages]);
+  }, []);
 
-  return { pages, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage, reorderPages };
+  return { pages, loading, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage, reorderPages };
 }

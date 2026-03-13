@@ -2,14 +2,14 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/index.js';
 import { studioPages, studioTemplates } from '../db/schema.js';
-import { eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, sql } from 'drizzle-orm';
 import type { AppEnv } from '../types.js';
 
 export const studioRoutes = new Hono<AppEnv>();
 
 // ─── Pages ────────────────────────────────────────────
 studioRoutes.get('/pages', async (c) => {
-  const rows = await db.select().from(studioPages).orderBy(studioPages.updatedAt);
+  const rows = await db.select().from(studioPages).orderBy(asc(studioPages.sortOrder), desc(studioPages.updatedAt));
   return c.json({ data: rows, error: null });
 });
 
@@ -21,6 +21,8 @@ studioRoutes.post('/pages', async (c) => {
     content: z.record(z.unknown()).optional(),
     parentId: z.string().uuid().optional(),
     isPinned: z.boolean().optional(),
+    sortOrder: z.number().int().optional(),
+    coverUrl: z.string().optional(),
   });
   const parsed = schema.safeParse(body);
   if (!parsed.success) return c.json({ data: null, error: 'Validation failed' }, 422);
@@ -44,6 +46,9 @@ studioRoutes.patch('/pages/:id', async (c) => {
     content: z.record(z.unknown()).optional(),
     parentId: z.string().uuid().nullable().optional(),
     isPinned: z.boolean().optional(),
+    sortOrder: z.number().int().optional(),
+    coverUrl: z.string().nullable().optional(),
+    shareToken: z.string().nullable().optional(),
   });
   const parsed = schema.safeParse(body);
   if (!parsed.success) return c.json({ data: null, error: 'Validation failed' }, 422);

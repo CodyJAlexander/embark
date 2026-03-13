@@ -11,7 +11,7 @@ import { ShortcutsModal } from './ShortcutsModal';
 type SubView = 'editor' | 'gallery';
 
 export function StudioView() {
-  const { pages, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage, reorderPages } = useStudio();
+  const { pages, loading, addPage, createPage, updatePage, deletePage, togglePin, updateContent, movePage, reorderPages } = useStudio();
   const { templates, useTemplate, saveAsTemplate, deleteUserTemplate } = useStudioTemplates();
   const [subView, setSubView] = useState<SubView>('editor');
   const [activePage, setActivePage] = useState<StudioPage | null>(null);
@@ -47,14 +47,14 @@ export function StudioView() {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const handleCreatePage = useCallback(() => {
-    const page = createPage();
+  const handleCreatePage = useCallback(async () => {
+    const page = await createPage();
     setActivePage(page);
     setSubView('editor');
   }, [createPage]);
 
-  const handleCreateSubPage = useCallback((parentId: string) => {
-    const page = createPage('Untitled', '📄');
+  const handleCreateSubPage = useCallback(async (parentId: string) => {
+    const page = await createPage('Untitled', '📄');
     updatePage(page.id, { parentId });
     setActivePage({ ...page, parentId });
     setSubView('editor');
@@ -119,16 +119,20 @@ export function StudioView() {
           />
         ) : subView === 'editor' ? (
           <div className="h-full flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-2xl mb-3">📄</p>
-              <p className="text-zinc-500 font-medium mb-4">Select or create a page</p>
-              <button
-                onClick={handleCreatePage}
-                className="px-4 py-2 bg-yellow-400 text-zinc-900 font-bold text-sm border-2 border-zinc-900 rounded-[4px] shadow-[3px_3px_0_0_#18181b] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform"
-              >
-                + New Page
-              </button>
-            </div>
+            {loading ? (
+              <div className="text-zinc-400 text-sm">Loading pages…</div>
+            ) : (
+              <div className="text-center">
+                <p className="text-2xl mb-3">📄</p>
+                <p className="text-zinc-500 font-medium mb-4">Select or create a page</p>
+                <button
+                  onClick={handleCreatePage}
+                  className="px-4 py-2 bg-yellow-400 text-zinc-900 font-bold text-sm border-2 border-zinc-900 rounded-[4px] shadow-[3px_3px_0_0_#18181b] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform"
+                >
+                  + New Page
+                </button>
+              </div>
+            )}
           </div>
         ) : null}
 

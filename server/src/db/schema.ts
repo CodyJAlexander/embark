@@ -196,15 +196,18 @@ export const communicationLog = pgTable('communication_log', {
 
 // ─── STUDIO ──────────────────────────────────────────
 export const studioPages = pgTable('studio_pages', {
-  id:        uuid('id').primaryKey().defaultRandom(),
-  title:     text('title').notNull().default('Untitled'),
-  icon:      text('icon').notNull().default('📄'),
-  content:   jsonb('content').notNull().default({ type: 'doc', content: [] }),
-  parentId:  uuid('parent_id').references((): AnyPgColumn => studioPages.id, { onDelete: 'set null' }),
-  isPinned:  boolean('is_pinned').notNull().default(false),
-  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  id:         uuid('id').primaryKey().defaultRandom(),
+  title:      text('title').notNull().default('Untitled'),
+  icon:       text('icon').notNull().default('📄'),
+  content:    jsonb('content').notNull().default({ type: 'doc', content: [] }),
+  parentId:   uuid('parent_id').references((): AnyPgColumn => studioPages.id, { onDelete: 'set null' }),
+  isPinned:   boolean('is_pinned').notNull().default(false),
+  sortOrder:  integer('sort_order'),
+  coverUrl:   text('cover_url'),
+  shareToken: text('share_token').unique(),
+  createdBy:  uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt:  timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt:  timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_studio_pages_parent').on(t.parentId),
 ]);
