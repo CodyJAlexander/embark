@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import type { StoredUser } from '../types';
-import { api, setToken, clearToken } from '../lib/api';
+import { api, apiFetch, setToken, clearToken } from '../lib/api';
 import { migrateClientsFromLocalStorage } from '../utils/migrateLocalStorage';
 
 export interface RegisterData {
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setInitializing(false);
       return;
     }
-    api.get<ApiUser>('/api/v1/auth/me').then(response => {
+    apiFetch<ApiUser>('/api/v1/auth/me', { skipRedirectOn401: true }).then(response => {
       if (response.data) {
         setCurrentUser(mapApiUser(response.data));
       } else {

@@ -24,8 +24,10 @@ export interface ApiResponse<T> {
 
 export async function apiFetch<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit & { skipRedirectOn401?: boolean } = {}
 ): Promise<ApiResponse<T>> {
+  const { skipRedirectOn401, ...fetchOptions } = options;
+  options = fetchOptions;
   const token = getToken();
 
   // Normalize headers safely — handles Headers object, string[][], or plain object
@@ -51,7 +53,7 @@ export async function apiFetch<T>(
 
   if (res.status === 401) {
     clearToken();
-    window.location.href = '/';
+    if (!skipRedirectOn401) window.location.href = '/';
     return { data: null, error: 'Unauthorized', code: 'UNAUTHORIZED' };
   }
 
