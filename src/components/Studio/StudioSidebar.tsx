@@ -204,6 +204,7 @@ interface Props {
   onUpdatePage: (id: string, data: Partial<StudioPage>) => void;
   onDeletePage: (id: string) => void;
   onTogglePin: (id: string) => void;
+  onOpenSearch: () => void;
 }
 
 export function StudioSidebar({
@@ -218,6 +219,7 @@ export function StudioSidebar({
   onUpdatePage,
   onDeletePage,
   onTogglePin,
+  onOpenSearch,
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
@@ -259,6 +261,14 @@ export function StudioSidebar({
           ◂
         </button>
       </div>
+
+      {/* Quick Find */}
+      <button
+        onClick={onOpenSearch}
+        className="mx-2 mb-1 flex items-center gap-2 px-2 py-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 rounded-[4px] transition-colors border border-zinc-800"
+      >
+        <span>🔍</span> Quick Find <span className="ml-auto text-zinc-700">⌘K</span>
+      </button>
 
       {/* Page tree */}
       <div className="flex-1 overflow-y-auto py-1">

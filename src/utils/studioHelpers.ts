@@ -77,3 +77,78 @@ export function tiptapToPlainText(content: JSONContent): string {
   }
   return (content.content ?? []).map(nodeToText).filter(Boolean).join('\n');
 }
+
+/** Convert Tiptap JSONContent to a Markdown string for export. */
+export function tiptapToMarkdown(content: JSONContent): string {
+  function nodeToMd(node: JSONContent, listContext?: 'bullet' | 'ordered' | 'task', index?: number): string {
+    if (node.type === 'text') {
+      let text = node.text ?? '';
+      if (node.marks) {
+        for (const mark of node.marks) {
+          if (mark.type === 'bold') text = `**${text}**`;
+          else if (mark.type === 'italic') text = `*${text}*`;
+          else if (mark.type === 'code') text = `\`${text}\``;
+          else if (mark.type === 'underline') text = `<u>${text}</u>`;
+          else if (mark.type === 'link') text = `[${text}](${mark.attrs?.href ?? ''})`;
+        }
+      }
+      return text;
+    }
+    if (node.type === 'hardBreak') return '  \n';
+
+    const children = (node.content ?? []).map((n, i) => nodeToMd(n, undefined, i)).join('');
+
+    switch (node.type) {
+      case 'heading':
+        return `${'#'.repeat(node.attrs?.level ?? 1)} ${children}\n\n`;
+      case 'paragraph':
+        return children ? `${children}\n\n` : '\n';
+      case 'bulletList':
+        return (node.content ?? []).map((n) => nodeToMd(n, 'bullet')).join('') + '\n';
+      case 'orderedList':
+        return (node.content ?? []).map((n, i) => nodeToMd(n, 'ordered', i + 1)).join('') + '\n';
+      case 'taskList':
+        return (node.content ?? []).map((n) => nodeToMd(n, 'task')).join('') + '\n';
+      case 'listItem': {
+        const inner = (node.content ?? []).map((n) => nodeToMd(n)).join('').replace(/\n\n$/, '');
+        if (listContext === 'ordered') return `${index ?? 1}. ${inner}\n`;
+        return `- ${inner}\n`;
+      }
+      case 'taskItem': {
+        const checked = node.attrs?.checked ? 'x' : ' ';
+        const inner = (node.content ?? []).map((n) => nodeToMd(n)).join('').replace(/\n\n$/, '');
+        return `- [${checked}] ${inner}\n`;
+      }
+      case 'blockquote':
+        return children.split('\n').map((l) => l ? `> ${l}` : '>').join('\n') + '\n\n';
+      case 'codeBlock':
+        return `\`\`\`${node.attrs?.language ?? ''}\n${children}\n\`\`\`\n\n`;
+      case 'horizontalRule':
+        return '---\n\n';
+      case 'table': {
+        const rows = node.content ?? [];
+        return rows.map((row, rowIdx) => {
+          const cells = (row.content ?? []).map((cell) =>
+            (cell.content ?? []).map((n) => nodeToMd(n)).join('').replace(/\n+/g, ' ').trim()
+          );
+          const line = `| ${cells.join(' | ')} |`;
+          if (rowIdx === 0) {
+            const sep = `| ${cells.map(() => '---').join(' | ')} |`;
+            return `${line}\n${sep}`;
+          }
+          return line;
+        }).join('\n') + '\n\n';
+      }
+      case 'calloutBlock': {
+        const emoji = node.attrs?.emoji ?? '💡';
+        return `> ${emoji} ${children.trim()}\n\n`;
+      }
+      case 'toggleBlock':
+        return `<details>\n<summary>Toggle</summary>\n\n${children}</details>\n\n`;
+      default:
+        return children;
+    }
+  }
+
+  return (content.content ?? []).map((n) => nodeToMd(n)).join('').trim();
+}

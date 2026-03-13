@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { StudioPage } from '../../types';
 import { useStudio } from '../../hooks/useStudio';
 import { useStudioTemplates } from '../../hooks/useStudioTemplates';
 import { StudioSidebar } from './StudioSidebar';
+import { StudioSearch } from './StudioSearch';
 import { PageEditor } from './PageEditor';
 import { TemplateGallery } from './gallery/TemplateGallery';
 
@@ -14,6 +15,18 @@ export function StudioView() {
   const [subView, setSubView] = useState<SubView>('editor');
   const [activePage, setActivePage] = useState<StudioPage | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearch(true);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   const handleCreatePage = useCallback(() => {
     const page = createPage();
@@ -64,6 +77,7 @@ export function StudioView() {
         onUpdatePage={updatePage}
         onDeletePage={handleDeletePage}
         onTogglePin={togglePin}
+        onOpenSearch={() => setShowSearch(true)}
       />
 
       <div className="flex-1 min-w-0 overflow-hidden">
@@ -104,6 +118,13 @@ export function StudioView() {
           />
         )}
       </div>
+      {showSearch && (
+        <StudioSearch
+          pages={pages}
+          onSelect={(page) => { handleOpenPage(page); setShowSearch(false); }}
+          onClose={() => setShowSearch(false)}
+        />
+      )}
     </div>
   );
 }

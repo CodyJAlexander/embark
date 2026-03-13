@@ -6,6 +6,7 @@ import { TiptapEditor } from './editor/TiptapEditor';
 import { AIPageActions } from './editor/AIPageActions';
 import { Modal } from '../UI/Modal';
 import { Button } from '../UI/Button';
+import { tiptapToPlainText, tiptapToMarkdown } from '../../utils/studioHelpers';
 
 const ICON_OPTIONS = ['📄', '📝', '📋', '🗓️', '💡', '🚀', '⭐', '🔥', '💼', '🎯', '📊', '🤝', '🧠', '🗺️', '✅'];
 
@@ -58,6 +59,11 @@ export function PageEditor({
   const [templateDesc, setTemplateDesc] = useState('');
   const [templateCategory, setTemplateCategory] = useState<StudioTemplateCategory>('custom');
   const [saved, setSaved] = useState(false);
+  // Compute initial word count
+  const [wordCount, setWordCount] = useState(() => {
+    const text = tiptapToPlainText(page.content);
+    return text.split(/\s+/).filter(Boolean).length;
+  });
   const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorRef = useRef<Editor | null>(null);
 
@@ -68,6 +74,9 @@ export function PageEditor({
     if (saveIndicatorRef.current) clearTimeout(saveIndicatorRef.current);
     setSaved(false);
     saveIndicatorRef.current = setTimeout(() => setSaved(true), 600);
+    // Update word count
+    const text = tiptapToPlainText(content);
+    setWordCount(text.split(/\s+/).filter(Boolean).length);
   }, [page.id, onUpdateContent]);
 
   const handleTitleBlur = useCallback(() => {
@@ -96,6 +105,21 @@ export function PageEditor({
     if (!editor) return;
     editor.commands.insertContentAt(editor.state.doc.content.size, '\n' + text);
   }, []);
+
+  const handleExportMarkdown = useCallback(() => {
+    const currentContent = editorRef.current?.getJSON() ?? page.content;
+    const md = tiptapToMarkdown(currentContent);
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title || 'untitled'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowMenu(false);
+  }, [page.content, title]);
+
+  const readingTime = Math.max(1, Math.round(wordCount / 200));
 
   return (
     <div className="h-full flex flex-col p-6 overflow-hidden">
@@ -145,6 +169,12 @@ export function PageEditor({
                 className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2"
               >
                 <span>📁</span> Save as Template
+              </button>
+              <button
+                onClick={handleExportMarkdown}
+                className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors flex items-center gap-2"
+              >
+                <span>⬇️</span> Export as Markdown
               </button>
               <div className="border-t border-zinc-800" />
               <button
@@ -209,6 +239,11 @@ export function PageEditor({
             editorRef={editorRef}
           />
         </div>
+      </div>
+
+      {/* Word count footer */}
+      <div className="flex-shrink-0 border-t border-zinc-800 px-1 py-1.5 flex items-center gap-3">
+        <span className="text-xs text-zinc-600">{wordCount} {wordCount === 1 ? 'word' : 'words'} · {readingTime} min read</span>
       </div>
 
       {/* Save as Template modal */}

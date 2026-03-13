@@ -124,6 +124,18 @@ const COMMANDS: SlashCommand[] = [
         .run();
     },
   },
+  {
+    label: 'Callout',
+    icon: '💡',
+    desc: 'Highlighted callout box',
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus()
+        .deleteRange({ from: $from.start(), to: $from.pos })
+        .insertContent({ type: 'calloutBlock', attrs: { emoji: '💡', color: 'yellow' }, content: [{ type: 'paragraph' }] })
+        .run();
+    },
+  },
 ];
 
 interface Position { top: number; left: number }
