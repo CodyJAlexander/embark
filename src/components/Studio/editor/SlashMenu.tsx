@@ -9,66 +9,87 @@ interface SlashCommand {
   action: (editor: Editor) => void;
 }
 
-function deleteSlashAndRun(editor: Editor, fn: (e: Editor) => void) {
-  const { $from } = editor.state.selection;
-  editor.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).run();
-  fn(editor);
-}
-
 const COMMANDS: SlashCommand[] = [
   {
     label: 'Text',
     icon: '¶',
     desc: 'Plain paragraph',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().setParagraph().run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setParagraph().run();
+    },
   },
   {
     label: 'Heading 1',
     icon: 'H1',
     desc: 'Big section heading',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().setHeading({ level: 1 }).run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setHeading({ level: 1 }).run();
+    },
   },
   {
     label: 'Heading 2',
     icon: 'H2',
     desc: 'Medium section heading',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().setHeading({ level: 2 }).run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setHeading({ level: 2 }).run();
+    },
   },
   {
     label: 'Heading 3',
     icon: 'H3',
     desc: 'Small section heading',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().setHeading({ level: 3 }).run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setHeading({ level: 3 }).run();
+    },
   },
   {
     label: 'Bullet List',
     icon: '•',
     desc: 'Unordered list',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().toggleBulletList().run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).toggleBulletList().run();
+    },
   },
   {
     label: 'Numbered List',
     icon: '1.',
     desc: 'Ordered list',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().toggleOrderedList().run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).toggleOrderedList().run();
+    },
   },
   {
     label: 'To-do',
     icon: '☐',
     desc: 'Checkbox task item',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().toggleTaskList().run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).toggleTaskList().run();
+    },
   },
   {
     label: 'Quote',
     icon: '"',
     desc: 'Blockquote',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().setBlockquote().run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setBlockquote().run();
+    },
   },
   {
     label: 'Code Block',
     icon: '</>',
     desc: 'Monospace code block',
-    action: (e) => deleteSlashAndRun(e, (ed) => ed.chain().focus().setCodeBlock().run()),
+    action: (e) => {
+      const { $from } = e.state.selection;
+      e.chain().focus().deleteRange({ from: $from.start(), to: $from.pos }).setCodeBlock().run();
+    },
   },
   {
     label: 'Divider',
@@ -97,6 +118,12 @@ export function SlashMenu({ editor }: Props) {
   const filtered = filterText
     ? COMMANDS.filter((cmd) => cmd.label.toLowerCase().includes(filterText.toLowerCase()))
     : COMMANDS;
+
+  // Keep refs in sync so the keyboard effect can read latest values without re-registering
+  const filteredRef = useRef(filtered);
+  filteredRef.current = filtered;
+  const selectedIndexRef = useRef(selectedIndex);
+  selectedIndexRef.current = selectedIndex;
 
   // Reset selectedIndex when filterText changes
   useEffect(() => {
@@ -144,18 +171,20 @@ export function SlashMenu({ editor }: Props) {
     if (!pos || !editor) return;
 
     const handler = (e: KeyboardEvent) => {
+      const currentFiltered = filteredRef.current;
+      const currentIndex = selectedIndexRef.current;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         e.stopPropagation();
-        setSelectedIndex((i) => (filtered.length === 0 ? 0 : (i + 1) % filtered.length));
+        setSelectedIndex(currentFiltered.length === 0 ? 0 : (currentIndex + 1) % currentFiltered.length);
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         e.stopPropagation();
-        setSelectedIndex((i) => (filtered.length === 0 ? 0 : (i - 1 + filtered.length) % filtered.length));
+        setSelectedIndex(currentFiltered.length === 0 ? 0 : (currentIndex - 1 + currentFiltered.length) % currentFiltered.length);
       } else if (e.key === 'Enter') {
         e.preventDefault();
         e.stopPropagation();
-        const cmd = filtered[selectedIndex];
+        const cmd = currentFiltered[currentIndex];
         if (cmd) {
           cmd.action(editor);
           setPos(null);
@@ -173,9 +202,12 @@ export function SlashMenu({ editor }: Props) {
     return () => {
       document.removeEventListener('keydown', handler, true);
     };
-  }, [pos, editor, filtered, selectedIndex]);
+  }, [pos, editor]);
 
   if (!editor || !pos) return null;
+
+  // Trim stale item refs to match current filtered list length
+  itemRefs.current.length = filtered.length;
 
   return createPortal(
     <div
