@@ -4,6 +4,7 @@ import type { Editor } from '@tiptap/react';
 import type { StudioPage, StudioTemplateCategory } from '../../types';
 import { TiptapEditor } from './editor/TiptapEditor';
 import { AIPageActions } from './editor/AIPageActions';
+import { TableOfContents } from './editor/TableOfContents';
 import { Modal } from '../UI/Modal';
 import { Button } from '../UI/Button';
 import { tiptapToPlainText, tiptapToMarkdown } from '../../utils/studioHelpers';
@@ -81,8 +82,10 @@ export function PageEditor({
     const text = tiptapToPlainText(page.content);
     return text.split(/\s+/).filter(Boolean).length;
   });
+  const [showToc, setShowToc] = useState(false);
   const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorRef = useRef<Editor | null>(null);
+  const editorScrollRef = useRef<HTMLDivElement>(null);
   const coverPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -231,6 +234,23 @@ export function PageEditor({
 
         {saved && <span className="text-xs text-zinc-500 font-medium flex-shrink-0">Saved</span>}
 
+        {/* Table of contents toggle */}
+        <button
+          onClick={() => setShowToc((v) => !v)}
+          className={`p-1.5 rounded-[4px] transition-colors ${
+            showToc
+              ? 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+          }`}
+          title="Table of contents"
+          aria-label="Toggle table of contents"
+          aria-pressed={showToc}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h16M4 18h10" />
+          </svg>
+        </button>
+
         {/* Keyboard shortcuts */}
         <button
           onClick={onOpenShortcuts}
@@ -350,14 +370,19 @@ export function PageEditor({
       )}
 
       {/* Tiptap Editor */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl">
-          <TiptapEditor
-            content={page.content}
-            onChange={handleContentChange}
-            editorRef={editorRef}
-          />
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        <div className="flex-1 overflow-y-auto" ref={editorScrollRef}>
+          <div className="max-w-3xl">
+            <TiptapEditor
+              content={page.content}
+              onChange={handleContentChange}
+              editorRef={editorRef}
+            />
+          </div>
         </div>
+        {showToc && (
+          <TableOfContents content={page.content} editorScrollRef={editorScrollRef} />
+        )}
       </div>
 
       {/* Word count footer */}
