@@ -6,6 +6,24 @@ import { generateId } from '../utils/helpers';
 
 const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
 
+/**
+ * Collects the IDs of all descendants of a given page (BFS traversal).
+ * The root ID itself is NOT included — callers should add it separately.
+ */
+export function collectDescendantIds(id: string, pages: StudioPage[]): string[] {
+  const descendants: string[] = [];
+  const queue: string[] = [id];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const children = pages.filter((p) => p.parentId === current);
+    for (const child of children) {
+      descendants.push(child.id);
+      queue.push(child.id);
+    }
+  }
+  return descendants;
+}
+
 export function useStudio() {
   const [pages, setPages] = useLocalStorage<StudioPage[]>('studio-pages', []);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,7 +55,10 @@ export function useStudio() {
   }, [setPages]);
 
   const deletePage = useCallback((id: string) => {
-    setPages((prev) => prev.filter((p) => p.id !== id));
+    setPages((prev) => {
+      const toDelete = new Set([id, ...collectDescendantIds(id, prev)]);
+      return prev.filter((p) => !toDelete.has(p.id));
+    });
   }, [setPages]);
 
   const togglePin = useCallback((id: string) => {
