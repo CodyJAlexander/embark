@@ -144,7 +144,7 @@ export function StudioView() {
       {showSearch && (
         <StudioSearch
           pages={pages}
-          onSelect={(page) => { handleOpenPage(page); setShowSearch(false); }}
+          onSelect={(page: StudioPage) => { handleOpenPage(page); setShowSearch(false); }}
           onClose={() => setShowSearch(false)}
         />
       )}
