@@ -717,7 +717,7 @@ export interface StudioPage {
   title: string;
   icon: string;              // emoji e.g. '📄'
   content: JSONContent;      // Tiptap ProseMirror JSON
-  parentId?: string | null;  // null = root page
+  parentId: string | null;   // null = root page
   isPinned: boolean;
   createdAt: string;         // ISO
   updatedAt: string;         // ISO

@@ -11,17 +11,24 @@ const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] }
  * The root ID itself is NOT included — callers should add it separately.
  */
 export function collectDescendantIds(id: string, pages: StudioPage[]): string[] {
-  const descendants: string[] = [];
+  const childMap = new Map<string, string[]>();
+  for (const p of pages) {
+    const key = p.parentId ?? '';
+    if (!childMap.has(key)) childMap.set(key, []);
+    childMap.get(key)!.push(p.id);
+  }
+
+  const result: string[] = [];
   const queue: string[] = [id];
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    const children = pages.filter((p) => p.parentId === current);
-    for (const child of children) {
-      descendants.push(child.id);
-      queue.push(child.id);
+  let head = 0;
+  while (head < queue.length) {
+    const current = queue[head++];
+    for (const childId of childMap.get(current) ?? []) {
+      result.push(childId);
+      queue.push(childId);
     }
   }
-  return descendants;
+  return result;
 }
 
 export function useStudio() {
