@@ -22,6 +22,8 @@ export const ToggleNode = Node.create({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
+      let currentAttrs = node.attrs;
+
       const dom = document.createElement('div');
       dom.className = 'toggle-block';
       dom.setAttribute('data-type', 'toggleBlock');
@@ -30,22 +32,22 @@ export const ToggleNode = Node.create({
       const btn = document.createElement('button');
       btn.contentEditable = 'false';
       btn.className = 'toggle-btn';
-      btn.textContent = node.attrs.open ? '▼' : '▶';
+      btn.textContent = currentAttrs.open ? '▼' : '▶';
       btn.addEventListener('click', () => {
-        if (typeof getPos === 'function') {
-          const newOpen = !node.attrs.open;
-          editor.commands.command(({ tr }) => {
-            tr.setNodeMarkup(getPos(), undefined, { ...node.attrs, open: newOpen });
-            return true;
-          });
-        }
+        if (typeof getPos !== 'function') return;
+        const newOpen = !currentAttrs.open;
+        editor.commands.command(({ tr, dispatch }) => {
+          tr.setNodeMarkup(getPos(), undefined, { ...currentAttrs, open: newOpen });
+          if (dispatch) dispatch(tr);
+          return true;
+        });
       });
       dom.appendChild(btn);
 
       // Editable content area
       const contentDOM = document.createElement('div');
       contentDOM.className = 'toggle-content';
-      if (!node.attrs.open) contentDOM.style.display = 'none';
+      if (!currentAttrs.open) contentDOM.style.display = 'none';
       dom.appendChild(contentDOM);
 
       return {
@@ -53,11 +55,25 @@ export const ToggleNode = Node.create({
         contentDOM,
         update(updatedNode) {
           if (updatedNode.type.name !== 'toggleBlock') return false;
+          currentAttrs = updatedNode.attrs;
           btn.textContent = updatedNode.attrs.open ? '▼' : '▶';
           contentDOM.style.display = updatedNode.attrs.open ? '' : 'none';
           return true;
         },
       };
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      Enter: () => {
+        const { $from, empty } = this.editor.state.selection;
+        if (!empty) return false;
+        if ($from.parent.content.size === 0 && $from.depth >= 2) {
+          return this.editor.commands.liftEmptyBlock();
+        }
+        return false;
+      },
     };
   },
 });
