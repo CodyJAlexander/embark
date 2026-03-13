@@ -44,8 +44,8 @@ export function ShortcutsModal({ isOpen, onClose }: Props) {
   const right = SHORTCUTS.slice(mid);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Keyboard Shortcuts">
-      <div className="flex gap-6 min-w-[480px]">
+    <Modal isOpen={isOpen} onClose={onClose} title="Keyboard Shortcuts" size="lg">
+      <div className="flex gap-6 w-full">
         <ShortcutList entries={left} />
         <div className="w-px bg-zinc-800 flex-shrink-0" />
         <ShortcutList entries={right} />
