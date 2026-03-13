@@ -16,12 +16,18 @@ export function StudioView() {
   const [activePage, setActivePage] = useState<StudioPage | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [zenMode, setZenMode] = useState(false);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setShowSearch(true);
+      } else if (e.key === 'F11') {
+        e.preventDefault();
+        setZenMode((v) => !v);
+      } else if (e.key === 'Escape') {
+        setZenMode(false);
       }
     };
     document.addEventListener('keydown', handler);
@@ -72,7 +78,7 @@ export function StudioView() {
         onCreatePage={handleCreatePage}
         onCreateSubPage={handleCreateSubPage}
         onOpenGallery={() => setSubView('gallery')}
-        collapsed={sidebarCollapsed}
+        collapsed={zenMode || sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((v) => !v)}
         onUpdatePage={updatePage}
         onDeletePage={handleDeletePage}
@@ -93,6 +99,8 @@ export function StudioView() {
             onTogglePin={togglePin}
             onMovePage={movePage}
             onSaveAsTemplate={saveAsTemplate}
+            zenMode={zenMode}
+            onToggleZen={() => setZenMode((v) => !v)}
           />
         ) : subView === 'editor' ? (
           <div className="h-full flex items-center justify-center">
