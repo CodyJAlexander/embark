@@ -98,9 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async (): Promise<void> => {
-    await api.post('/api/v1/auth/logout', {});
-    clearToken();
-    setCurrentUser(null);
+    try {
+      await api.post('/api/v1/auth/logout', {});
+    } finally {
+      clearToken();
+      setCurrentUser(null);
+    }
   }, []);
 
   const updateUser = useCallback(async (updates: Partial<StoredUser>): Promise<void> => {
