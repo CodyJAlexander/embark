@@ -36,17 +36,15 @@ gamificationRoutes.post('/deeds/:deedId', async (c) => {
   if (existing) {
     // Check if deed already unlocked
     const deeds = existing.deeds as Array<{ id: string }>;
-    if (deeds.some((d) => d.id === deedId)) {
+    if (deeds.some((d) => String(d.id) === String(deedId))) {
       return c.json({ data: existing, error: null }); // Idempotent
     }
 
     // Append deed and add XP atomically
-    const newXp = existing.xp + xpReward;
-    const newLevel = Math.floor(newXp / 100) + 1;
     const [updated] = await db.update(gamificationState).set({
-      xp: newXp,
-      level: newLevel,
-      weeklyXp: existing.weeklyXp + xpReward,
+      xp: sql`xp + ${xpReward}`,
+      level: sql`FLOOR((xp + ${xpReward}) / 100) + 1`,
+      weeklyXp: sql`weekly_xp + ${xpReward}`,
       deeds: sql`deeds || ${JSON.stringify([deed])}::jsonb`,
       updatedAt: new Date(),
     }).where(eq(gamificationState.userId, userId)).returning();

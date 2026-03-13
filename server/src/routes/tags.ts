@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { db } from '../db/index.js';
 import { tags, clientTags } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import type { AppEnv } from '../types.js';
 
 export const tagRoutes = new Hono<AppEnv>();
@@ -54,7 +54,10 @@ tagRoutes.post('/clients/:clientId/tags/:tagId', async (c) => {
 
 tagRoutes.delete('/clients/:clientId/tags/:tagId', async (c) => {
   await db.delete(clientTags).where(
-    eq(clientTags.clientId, c.req.param('clientId'))
+    and(
+      eq(clientTags.clientId, c.req.param('clientId')),
+      eq(clientTags.tagId, c.req.param('tagId'))
+    )
   );
   return c.json({ data: { ok: true }, error: null });
 });

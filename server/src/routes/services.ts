@@ -17,7 +17,7 @@ serviceRoutes.post('/', async (c) => {
   const schema = z.object({
     name: z.string().min(1),
     description: z.string().optional(),
-    price: z.string().optional(),
+    price: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Price must be a valid decimal number').optional(),
     category: z.string().optional(),
   });
   const parsed = schema.safeParse(body);
@@ -39,7 +39,7 @@ serviceRoutes.patch('/:id', async (c) => {
   const schema = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
-    price: z.string().optional(),
+    price: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Price must be a valid decimal number').optional(),
     category: z.string().optional(),
   });
   const parsed = schema.safeParse(body);

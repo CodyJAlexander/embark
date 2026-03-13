@@ -32,6 +32,8 @@ app.use('*', cfAccessMiddleware);
 
 // ─── Public routes (no auth required) ────────────────
 app.route('/api/v1/auth', authRoutes);
+// Form responses are public — mounted before auth middleware
+app.post('/api/v1/forms/:id/responses', (c) => formRoutes.fetch(c.req.raw));
 
 // ─── Protected routes ─────────────────────────────────
 app.use('/api/v1/*', authMiddleware);
