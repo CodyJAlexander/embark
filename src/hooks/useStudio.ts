@@ -70,7 +70,16 @@ export function useStudio() {
 
   const togglePin = useCallback((id: string) => {
     setPages((prev) =>
-      prev.map((p) => p.id === id ? { ...p, isPinned: !p.isPinned, updatedAt: new Date().toISOString() } : p)
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const nowPinned = !p.isPinned;
+        return {
+          ...p,
+          isPinned: nowPinned,
+          sortOrder: nowPinned ? undefined : p.sortOrder,
+          updatedAt: new Date().toISOString(),
+        };
+      })
     );
   }, [setPages]);
 

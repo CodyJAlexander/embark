@@ -3,6 +3,7 @@ import {
   DndContext,
   DragEndEvent,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
   closestCenter,
@@ -12,6 +13,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
   useSortable,
+  sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { StudioPage } from '../../types';
@@ -215,7 +217,16 @@ function SortablePageTreeNode(props: PageTreeNodeProps) {
     opacity: isDragging ? 0.4 : 1,
   };
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} className="relative group/sortable">
+      {/* Drag handle — only this element receives pointer listeners */}
+      <div
+        {...listeners}
+        className="absolute left-0 top-0 bottom-0 w-3 cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-100 flex items-center justify-center text-zinc-600 hover:text-zinc-400 transition-opacity z-10 select-none"
+        aria-label="Drag to reorder"
+        title="Drag to reorder"
+      >
+        ⠿
+      </div>
       <PageTreeNode {...props} />
     </div>
   );
@@ -255,16 +266,19 @@ export function StudioSidebar({
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const rootPages = pages.filter((p) => !p.parentId);
   const pinnedPages = rootPages.filter((p) => p.isPinned);
   const unpinnedPages = rootPages.filter((p) => !p.isPinned);
 
-  const sortedUnpinnedPages = [...unpinnedPages].sort(
-    (a, b) => (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity)
-  );
+  const sortedUnpinnedPages = [...unpinnedPages].sort((a, b) => {
+    const orderDiff = (a.sortOrder ?? Infinity) - (b.sortOrder ?? Infinity);
+    if (orderDiff !== 0) return orderDiff;
+    return a.createdAt < b.createdAt ? -1 : 1;
+  });
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
