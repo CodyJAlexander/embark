@@ -136,14 +136,14 @@ export function TiptapEditor({ pageId, currentUser, onChange, editable = true, i
     if (editorRef) editorRef.current = editor;
   }, [editor, editorRef]);
 
-  // Seed initial content for read-only/public views
+  // Seed initial content for read-only/public views only — never for editable instances
+  // (editable instances get content from Yjs/WebSocket; seeding would race with live sync)
   useEffect(() => {
-    if (!initialContent || !editor) return;
-    // Only set if doc is empty (don't overwrite collab content)
+    if (!initialContent || !editor || editable) return;
     if (editor.isEmpty) {
       editor.commands.setContent(initialContent);
     }
-  }, [editor, initialContent]);
+  }, [editor, initialContent, editable]);
 
   // Destroy editor on unmount
   useEffect(() => {

@@ -35,10 +35,12 @@ export function ShareModal({ pageId, initialShareToken, isOpen, onClose, onShare
 
   async function handleDisable() {
     setLoading(true);
-    await api.delete(`/api/v1/studio/pages/${pageId}/share`);
+    const res = await api.delete(`/api/v1/studio/pages/${pageId}/share`);
     setLoading(false);
-    setShareToken(null);
-    onShareTokenChange(null);
+    if (!res.error) {
+      setShareToken(null);
+      onShareTokenChange(null);
+    }
   }
 
   async function handleCopy() {
