@@ -24,6 +24,7 @@ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { MorningBriefing } from './components/Focus/MorningBriefing';
 import { ClientPortalView } from './components/Portal/ClientPortalView';
 import { NPSSurveyView } from './components/Survey/NPSSurveyView';
+const SharedPage = lazy(() => import('./pages/SharedPage'));
 import type { View, Client } from './types';
 import { useSLAStatuses } from './hooks/useSLA';
 import { useAnomalyDetection } from './hooks/useAnomalyDetection';
@@ -111,6 +112,18 @@ function WebhookServiceInit() {
   }, []);
 
   return null;
+}
+
+function SharedRoute({ children }: { children: ReactNode }) {
+  const match = window.location.pathname.match(/^\/shared\/(.+)$/);
+  if (match) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><p className="text-zinc-500">Loading…</p></div>}>
+        <SharedPage token={match[1]} />
+      </Suspense>
+    );
+  }
+  return <>{children}</>;
 }
 
 function SurveyRoute({ children }: { children: ReactNode }) {
@@ -305,6 +318,7 @@ function App() {
         <ErrorBoundary>
           <ToastProvider>
             <ClientProvider>
+              <SharedRoute>
               <FormRoute>
                 <SurveyRoute>
                   <PortalRoute>
@@ -314,6 +328,7 @@ function App() {
                   </PortalRoute>
                 </SurveyRoute>
               </FormRoute>
+            </SharedRoute>
             </ClientProvider>
           </ToastProvider>
         </ErrorBoundary>

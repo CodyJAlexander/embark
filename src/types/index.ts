@@ -721,6 +721,7 @@ export interface StudioPage {
   isPinned: boolean;
   sortOrder?: number;
   coverUrl?: string;         // CSS gradient string for cover banner
+  shareToken?: string | null; // public share token — null means not shared
   createdAt: string;         // ISO
   updatedAt: string;         // ISO
 }

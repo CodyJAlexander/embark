@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server';
+import type { Server } from 'http';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -6,6 +7,9 @@ import type { AppEnv } from './types.js';
 import { authRoutes } from './routes/auth.js';
 import { clientRoutes } from './routes/clients.js';
 import { studioRoutes } from './routes/studio.js';
+import { studioHistoryRoutes } from './routes/studioHistory.js';
+import { studioCommentRoutes } from './routes/studioComments.js';
+import { studioShareRoutes, studioPublicRoutes } from './routes/studioShare.js';
 import { templateRoutes } from './routes/templates.js';
 import { budRoutes } from './routes/buds.js';
 import { automationRoutes } from './routes/automations.js';
@@ -17,6 +21,7 @@ import { serviceRoutes } from './routes/services.js';
 import { tagRoutes } from './routes/tags.js';
 import { authMiddleware } from './middleware/auth.js';
 import { cfAccessMiddleware } from './middleware/cfAccess.js';
+import { attachYjsWebSocket } from './ws/yjsHandler.js';
 
 const app = new Hono<AppEnv>();
 
@@ -34,11 +39,16 @@ app.use('*', cfAccessMiddleware);
 app.route('/api/v1/auth', authRoutes);
 // Form responses are public — mounted before auth middleware
 app.post('/api/v1/forms/:id/responses', (c) => formRoutes.fetch(c.req.raw));
+// Public share route — mounted before authMiddleware
+app.route('/api/v1', studioPublicRoutes);  // mounts at /api/v1/public/pages/:token
 
 // ─── Protected routes ─────────────────────────────────
 app.use('/api/v1/*', authMiddleware);
 app.route('/api/v1/clients',      clientRoutes);
 app.route('/api/v1/studio',       studioRoutes);
+app.route('/api/v1/studio/pages', studioHistoryRoutes);
+app.route('/api/v1/studio/pages', studioCommentRoutes);
+app.route('/api/v1/studio/pages', studioShareRoutes);
 app.route('/api/v1/templates',    templateRoutes);
 app.route('/api/v1/buds',         budRoutes);
 app.route('/api/v1/automations',  automationRoutes);
@@ -63,6 +73,7 @@ app.onError((err, c) => {
 
 const port = Number(process.env.PORT ?? 3001);
 console.log(`API server running on port ${port}`);
-serve({ fetch: app.fetch, port });
+const httpServer = serve({ fetch: app.fetch, port }) as unknown as Server;
+attachYjsWebSocket(httpServer); // return value intentionally ignored in production
 
 export default app;

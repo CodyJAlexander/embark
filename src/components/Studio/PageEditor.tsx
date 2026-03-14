@@ -1,13 +1,21 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
+import type { WebsocketProvider } from 'y-websocket';
+import * as Y from 'yjs';
 import type { StudioPage, StudioTemplateCategory } from '../../types';
-import { TiptapEditor } from './editor/TiptapEditor';
+import { TiptapEditor, type CollabUser } from './editor/TiptapEditor';
+import { useAuth } from '../../context/AuthContext';
 import { AIPageActions } from './editor/AIPageActions';
 import { TableOfContents } from './editor/TableOfContents';
 import { Modal } from '../UI/Modal';
 import { Button } from '../UI/Button';
 import { tiptapToPlainText, tiptapToMarkdown } from '../../utils/studioHelpers';
+import { usePresence, type PresenceUser } from '../../hooks/usePresence';
+import { CursorPickerPopover, getCursorPrefs, type CursorPrefs } from './CursorPickerPopover';
+import { VersionHistoryPanel } from './VersionHistoryPanel';
+import { CommentsSidebar } from './CommentsSidebar';
+import { ShareModal } from './ShareModal';
 
 const ICON_OPTIONS = ['📄', '📝', '📋', '🗓️', '💡', '🚀', '⭐', '🔥', '💼', '🎯', '📊', '🤝', '🧠', '🗺️', '✅'];
 
@@ -66,6 +74,19 @@ export function PageEditor({
   page, pages, onNavigate, onUpdateContent, onUpdatePage, onDeletePage, onTogglePin, onSaveAsTemplate,
   zenMode, onToggleZen, onOpenShortcuts,
 }: Props) {
+  const { currentUser: authUser } = useAuth();
+  const [provider, setProvider] = useState<WebsocketProvider | null>(null);
+  const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
+  const [showCursorPicker, setShowCursorPicker] = useState(false);
+  const [cursorPrefs, setCursorPrefs] = useState<CursorPrefs>(getCursorPrefs);
+  const collabUser: CollabUser = {
+    id: authUser?.id ?? 'anonymous',
+    name: authUser?.username ?? 'Anonymous',
+    color: cursorPrefs.color,
+    emoji: cursorPrefs.emoji,
+  };
+  const presenceUsers = usePresence(provider);
+
   const [title, setTitle] = useState(page.title);
   const [icon, setIcon] = useState(page.icon);
   const [coverUrl, setCoverUrl] = useState<string | undefined>(page.coverUrl);
@@ -73,6 +94,7 @@ export function PageEditor({
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [templateName, setTemplateName] = useState(page.title);
   const [templateDesc, setTemplateDesc] = useState('');
   const [templateCategory, setTemplateCategory] = useState<StudioTemplateCategory>('custom');
@@ -83,6 +105,9 @@ export function PageEditor({
     return text.split(/\s+/).filter(Boolean).length;
   });
   const [showToc, setShowToc] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [pendingCommentId, setPendingCommentId] = useState<string | null>(null);
   // liveContent tracks editor JSON immediately (not debounced) so TOC stays in sync
   const [liveContent, setLiveContent] = useState<JSONContent>(page.content);
   const saveIndicatorRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -102,6 +127,8 @@ export function PageEditor({
   }, [showCoverPicker]);
 
   const breadcrumb = buildPath(page, pages);
+
+  const handleCloseCursorPicker = useCallback(() => setShowCursorPicker(false), []);
 
   const handleContentChange = useCallback((content: JSONContent) => {
     onUpdateContent(page.id, content);
@@ -135,6 +162,21 @@ export function PageEditor({
     setShowMenu(false);
   }, [page, title, icon, templateName, templateDesc, templateCategory, onSaveAsTemplate]);
 
+  const handleRemoveCommentMark = useCallback((commentId: string) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    // Find all positions in the doc that have a 'comment' mark with this commentId
+    editor.state.doc.descendants((node, pos) => {
+      const mark = node.marks.find(
+        (m) => m.type.name === 'comment' && m.attrs.commentId === commentId
+      );
+      if (mark) {
+        const tr = editor.state.tr.removeMark(pos, pos + node.nodeSize, mark.type);
+        editor.view.dispatch(tr);
+      }
+    });
+  }, []);
+
   const handleInsertContent = useCallback((text: string) => {
     const editor = editorRef.current;
     if (!editor) return;
@@ -159,6 +201,17 @@ export function PageEditor({
     setCoverUrl(g);
     setShowCoverPicker(false);
   }, [page.id, onUpdatePage]);
+
+  // Broadcast current user's cursor prefs via Yjs awareness
+  useEffect(() => {
+    if (!provider) return;
+    provider.awareness.setLocalStateField('user', {
+      name: collabUser.name,
+      color: collabUser.color,
+      emoji: collabUser.emoji,
+      avatarUrl: authUser?.avatarUrl,
+    });
+  }, [provider, collabUser.name, collabUser.color, collabUser.emoji, authUser?.avatarUrl]);
 
   const gradientPickerJSX = (positionClass: string, onPick: (g: string) => void) => (
     <div ref={coverPickerRef} className={`absolute z-30 bg-zinc-900 border-2 border-zinc-700 rounded-[4px] p-2 shadow-[3px_3px_0_0_#18181b] flex gap-2 ${positionClass}`}>
@@ -235,6 +288,47 @@ export function PageEditor({
           ))}
         </div>
 
+        {/* Presence chips */}
+        {presenceUsers.length > 0 && (
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {presenceUsers.slice(0, 4).map((u: PresenceUser) => (
+              <div
+                key={u.clientId}
+                title={`${u.name}${u.emoji ? ' ' + u.emoji : ''} — editing now`}
+                className="w-6 h-6 rounded-full border-2 border-zinc-900 flex items-center justify-center text-xs font-bold text-zinc-900 flex-shrink-0"
+                style={{ background: u.color }}
+              >
+                {u.emoji || u.name.charAt(0).toUpperCase()}
+              </div>
+            ))}
+            {presenceUsers.length > 4 && (
+              <div className="w-6 h-6 rounded-full border-2 border-zinc-700 bg-zinc-800 flex items-center justify-center text-xs text-zinc-400 flex-shrink-0">
+                +{presenceUsers.length - 4}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Cursor picker button */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={() => setShowCursorPicker((v) => !v)}
+            title="Your cursor color"
+            className="w-6 h-6 rounded-full border-2 border-zinc-600 hover:border-zinc-400 transition-colors"
+            style={{ background: cursorPrefs.color }}
+            aria-label="Choose cursor color"
+          />
+          {showCursorPicker && (
+            <CursorPickerPopover
+              onClose={handleCloseCursorPicker}
+              onChange={(p) => {
+                setCursorPrefs(p);
+                setShowCursorPicker(false);
+              }}
+            />
+          )}
+        </div>
+
         {saved && <span className="text-xs text-zinc-500 font-medium flex-shrink-0">Saved</span>}
 
         {/* Table of contents toggle */}
@@ -251,6 +345,36 @@ export function PageEditor({
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h16M4 18h10" />
+          </svg>
+        </button>
+
+        {/* Version history toggle */}
+        <button
+          onClick={() => setShowHistory((v) => !v)}
+          className={`p-1.5 rounded-[4px] transition-colors ${
+            showHistory
+              ? 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+          }`}
+          title="Version history"
+          aria-label="Toggle version history"
+          aria-pressed={showHistory}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+
+        {/* Comments toggle */}
+        <button
+          onClick={() => setShowComments((v) => !v)}
+          className={`p-1.5 rounded-[4px] transition-colors ${showComments ? 'bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/20' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
+          title="Comments"
+          aria-label="Toggle comments"
+          aria-pressed={showComments}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </button>
 
@@ -282,6 +406,18 @@ export function PageEditor({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
             </svg>
           )}
+        </button>
+
+        {/* Share button */}
+        <button
+          onClick={() => setShowShare(true)}
+          className="p-1.5 rounded-[4px] text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex-shrink-0"
+          title="Share page"
+          aria-label="Share page"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
         </button>
 
         {/* Menu */}
@@ -377,14 +513,56 @@ export function PageEditor({
         <div className="flex-1 overflow-y-auto" ref={editorScrollRef}>
           <div className="max-w-3xl">
             <TiptapEditor
-              content={page.content}
+              pageId={page.id}
+              currentUser={collabUser}
               onChange={handleContentChange}
               editorRef={editorRef}
+              onProviderReady={setProvider}
+              onYdocReady={setYdoc}
+              onAddComment={(commentId) => {
+                setPendingCommentId(commentId);
+                setShowComments(true);
+              }}
             />
           </div>
         </div>
         {showToc && (
           <TableOfContents content={liveContent} editorScrollRef={editorScrollRef} />
+        )}
+        {showHistory && (
+          <VersionHistoryPanel
+            pageId={page.id}
+            onClose={() => setShowHistory(false)}
+            onRestore={(snapshot) => {
+              if (!ydoc) return;
+              if (!confirm('Restore this version? This will overwrite the current content.')) return;
+              const decoded = Uint8Array.from(atob(snapshot), c => c.charCodeAt(0));
+              Y.applyUpdate(ydoc, decoded);
+              setShowHistory(false);
+            }}
+          />
+        )}
+        {showComments && (
+          <CommentsSidebar
+            pageId={page.id}
+            onClose={() => { setShowComments(false); setPendingCommentId(null); }}
+            onRemoveCommentMark={handleRemoveCommentMark}
+            onFocusComment={(commentId) => {
+              // Scroll/focus is best-effort; the highlight via CommentMark is always visible
+              editorRef.current?.commands.focus();
+              // Find the mark position and set selection there
+              const editor = editorRef.current;
+              if (!editor) return;
+              editor.state.doc.descendants((node, pos) => {
+                if (node.marks.some((m) => m.type.name === 'comment' && m.attrs.commentId === commentId)) {
+                  editor.commands.setTextSelection(pos);
+                  return false;
+                }
+              });
+            }}
+            pendingCommentId={pendingCommentId}
+            onCommentSubmitted={() => setPendingCommentId(null)}
+          />
         )}
       </div>
 
@@ -433,6 +611,14 @@ export function PageEditor({
           </div>
         </div>
       </Modal>
+
+      <ShareModal
+        pageId={page.id}
+        initialShareToken={page.shareToken}
+        isOpen={showShare}
+        onClose={() => setShowShare(false)}
+        onShareTokenChange={(token) => onUpdatePage(page.id, { shareToken: token })}
+      />
       </div>
     </div>
   );

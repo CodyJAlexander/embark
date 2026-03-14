@@ -196,15 +196,18 @@ export const communicationLog = pgTable('communication_log', {
 
 // ─── STUDIO ──────────────────────────────────────────
 export const studioPages = pgTable('studio_pages', {
-  id:        uuid('id').primaryKey().defaultRandom(),
-  title:     text('title').notNull().default('Untitled'),
-  icon:      text('icon').notNull().default('📄'),
-  content:   jsonb('content').notNull().default({ type: 'doc', content: [] }),
-  parentId:  uuid('parent_id').references((): AnyPgColumn => studioPages.id, { onDelete: 'set null' }),
-  isPinned:  boolean('is_pinned').notNull().default(false),
-  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  id:         uuid('id').primaryKey().defaultRandom(),
+  title:      text('title').notNull().default('Untitled'),
+  icon:       text('icon').notNull().default('📄'),
+  content:    jsonb('content').notNull().default({ type: 'doc', content: [] }),
+  parentId:   uuid('parent_id').references((): AnyPgColumn => studioPages.id, { onDelete: 'cascade' }),
+  isPinned:   boolean('is_pinned').notNull().default(false),
+  sortOrder:  integer('sort_order'),
+  coverUrl:   text('cover_url'),
+  shareToken: text('share_token').unique(),
+  createdBy:  uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt:  timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt:  timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_studio_pages_parent').on(t.parentId),
 ]);
@@ -222,6 +225,30 @@ export const studioTemplates = pgTable('studio_templates', {
   createdBy:   uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
   createdAt:   timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const studioPageHistory = pgTable('studio_page_history', {
+  id:        uuid('id').primaryKey().defaultRandom(),
+  pageId:    uuid('page_id').notNull().references(() => studioPages.id, { onDelete: 'cascade' }),
+  userId:    uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  snapshot:  text('snapshot').notNull(), // base64-encoded Yjs state vector
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_studio_history_page').on(t.pageId),
+  index('idx_studio_history_created').on(t.createdAt),
+]);
+
+export const studioComments = pgTable('studio_comments', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  pageId:     uuid('page_id').notNull().references(() => studioPages.id, { onDelete: 'cascade' }),
+  userId:     uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  commentId:  text('comment_id').notNull(), // matches the mark's commentId attribute in the doc
+  body:       text('body').notNull(),
+  resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  parentId:   uuid('parent_id').references((): AnyPgColumn => studioComments.id, { onDelete: 'cascade' }),
+  createdAt:  timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_studio_comments_page').on(t.pageId),
+]);
 
 // ─── TEMPLATES ───────────────────────────────────────
 export const emailTemplates = pgTable('email_templates', {

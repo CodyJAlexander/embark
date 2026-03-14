@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import './tiptap-editor.css';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -12,8 +12,13 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
+import Collaboration from '@tiptap/extension-collaboration';
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import type { JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
+import * as Y from 'yjs';
+import { WebsocketProvider } from 'y-websocket';
+import { IndexeddbPersistence } from 'y-indexeddb';
 import { SlashExtension } from './SlashExtension';
 import { SlashMenu } from './SlashMenu';
 import { BubbleToolbar } from './BubbleToolbar';
@@ -21,28 +26,96 @@ import { ToggleNode } from './ToggleNode';
 import { CalloutNode } from './CalloutNode';
 import { ClientMentionNode } from './ClientMentionNode';
 import { createClientMentionExtension } from './ClientMentionExtension';
+import { CommentMark } from './CommentMark';
 import { useClientContext } from '../../../context/ClientContext';
 
-const EMPTY_DOC: JSONContent = { type: 'doc', content: [{ type: 'paragraph' }] };
+const WS_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:3001')
+  .replace(/^http/i, 'ws');
 
-interface Props {
-  content: JSONContent;
-  onChange: (content: JSONContent) => void;
-  editable?: boolean;
-  editorRef?: React.MutableRefObject<Editor | null>;
+export interface CollabUser {
+  id: string;
+  name: string;
+  color: string;
+  emoji?: string;
 }
 
-export function TiptapEditor({ content, onChange, editable = true, editorRef }: Props) {
-  // Guard against old localStorage data (blocks array format)
-  const safeContent = (content && content.type === 'doc') ? content : EMPTY_DOC;
+interface Props {
+  pageId: string;
+  currentUser: CollabUser;
+  onChange: (content: JSONContent) => void;
+  editable?: boolean;
+  initialContent?: JSONContent;
+  editorRef?: React.MutableRefObject<Editor | null>;
+  onProviderReady?: (provider: WebsocketProvider | null) => void;
+  onYdocReady?: (ydoc: Y.Doc | null) => void;
+  onAddComment?: (commentId: string) => void;
+}
 
+export function TiptapEditor({ pageId, currentUser, onChange, editable = true, initialContent, editorRef, onProviderReady, onYdocReady, onAddComment }: Props) {
   const { clients } = useClientContext();
   const clientsRef = useRef(clients);
   useEffect(() => { clientsRef.current = clients; }, [clients]);
 
+  // Y.Doc is stable per pageId — recreated only when navigating to a different page
+  const ydoc = useMemo(() => new Y.Doc(), [pageId]);
+
+  // WebsocketProvider connects to the Yjs room for this page.
+  // Skipped when editable === false (e.g. public shared page view).
+  const provider = useMemo(() => {
+    if (!editable) return null;
+    const token = localStorage.getItem('embark-api-token') ?? '';
+    return new WebsocketProvider(
+      `${WS_BASE}/yjs`,
+      pageId,
+      ydoc,
+      { params: { token } }
+    );
+  }, [pageId, ydoc, editable]);
+
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    if (!provider) return;
+    setIsOffline(false);
+    const handleStatus = ({ status }: { status: string }) => {
+      setIsOffline(status === 'disconnected');
+    };
+    provider.on('status', handleStatus);
+    return () => provider.off('status', handleStatus);
+  }, [provider]);
+
+  // Local IndexedDB cache — fast initial load + offline writes
+  const idbPersistence = useMemo(() => {
+    if (!editable) return null;
+    return new IndexeddbPersistence(`embark-page-${pageId}`, ydoc);
+  }, [pageId, ydoc, editable]);
+
+  // Destroy provider, idbPersistence, and ydoc when pageId changes or component unmounts
+  useEffect(() => {
+    return () => {
+      provider?.destroy();
+      idbPersistence?.destroy();
+      ydoc.destroy();
+    };
+  }, [provider, idbPersistence, ydoc]);
+
+  // Notify parent when provider changes (used for presence/awareness)
+  useEffect(() => {
+    onProviderReady?.(provider);
+    return () => onProviderReady?.(null);
+  }, [provider, onProviderReady]);
+
+  // Notify parent when ydoc is ready (used for snapshot restore)
+  useEffect(() => {
+    onYdocReady?.(ydoc);
+    return () => onYdocReady?.(null);
+  }, [ydoc, onYdocReady]);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        // Disable StarterKit's built-in undo/redo — Yjs handles it via Y.UndoManager
+        undoRedo: false,
         codeBlock: { languageClassPrefix: 'language-' },
       }),
       Placeholder.configure({
@@ -63,10 +136,19 @@ export function TiptapEditor({ content, onChange, editable = true, editorRef }: 
       SlashExtension,
       ClientMentionNode,
       createClientMentionExtension(clientsRef),
+      CommentMark,
+      // Collaboration replaces StarterKit's document — must come after other extensions
+      Collaboration.configure({ document: ydoc }),
+      ...(provider ? [CollaborationCursor.configure({
+        provider,
+        user: {
+          name: currentUser.emoji ? `${currentUser.name} ${currentUser.emoji}` : currentUser.name,
+          color: currentUser.color,
+        },
+      })] : []),
     ],
-    content: safeContent,
+    // NO content prop — Yjs is the source of truth
     editable,
-    onUpdate: ({ editor: e }) => onChange(e.getJSON()),
   });
 
   // Expose editor instance via ref for parent components (e.g. save-as-template)
@@ -74,11 +156,30 @@ export function TiptapEditor({ content, onChange, editable = true, editorRef }: 
     if (editorRef) editorRef.current = editor;
   }, [editor, editorRef]);
 
-  // Destroy on unmount
+  // Seed initial content for read-only/public views only — never for editable instances
+  // (editable instances get content from Yjs/WebSocket; seeding would race with live sync)
+  useEffect(() => {
+    if (!initialContent || !editor || editable) return;
+    if (editor.isEmpty) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [editor, initialContent, editable]);
+
+  // Destroy editor on unmount
   useEffect(() => {
     return () => { editor?.destroy(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Notify parent of content changes via Yjs observer (keeps word count, TOC in sync)
+  useEffect(() => {
+    if (!editor) return;
+    const handler = () => {
+      onChange(editor.getJSON());
+    };
+    editor.on('update', handler);
+    return () => { editor.off('update', handler); };
+  }, [editor, onChange]);
 
   function handleChipClick(e: React.MouseEvent) {
     const chip = (e.target as HTMLElement).closest('[data-client-mention]');
@@ -92,8 +193,14 @@ export function TiptapEditor({ content, onChange, editable = true, editorRef }: 
 
   return (
     <div className="tiptap-editor" onClick={handleChipClick}>
-      <BubbleToolbar editor={editor} />
+      <BubbleToolbar editor={editor} onAddComment={onAddComment} />
       <SlashMenu editor={editor} />
+      {isOffline && (
+        <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded-[3px] text-xs text-zinc-400 w-fit">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 flex-shrink-0" />
+          Offline — changes saved locally
+        </div>
+      )}
       <EditorContent editor={editor} />
     </div>
   );
