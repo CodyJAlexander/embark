@@ -12,6 +12,23 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
+    version: '9.0.0',
+    date: 'March 13, 2026',
+    title: 'Studio v5 — Live Collaboration',
+    changes: [
+      { type: 'feature', description: 'Real-Time Collaborative Editing — multiple team members can edit the same Studio page simultaneously with instant sync and automatic conflict resolution (Yjs CRDT)' },
+      { type: 'feature', description: 'Live Cursors — see every collaborator\'s cursor as a colored caret with a name + emoji pill label that updates in real time as they move through the document' },
+      { type: 'feature', description: 'Cursor Picker — choose your cursor color (12 presets) and an optional emoji label from the toolbar; your preferences are remembered across sessions' },
+      { type: 'feature', description: 'Presence Chips — the editor header shows circular avatars for everyone currently on the page; hover for their name and emoji; overflow shows "+N more"' },
+      { type: 'feature', description: 'Version History — every save creates a snapshot; open the History panel to browse a timeline of past versions, preview any snapshot in read-only mode, and restore with one click' },
+      { type: 'feature', description: 'Inline Comments — select any text, click 💬 in the bubble toolbar, type a comment, and submit; text is highlighted in yellow; threaded replies and resolve in the Comments sidebar' },
+      { type: 'feature', description: 'Page Sharing — toggle "Anyone with link can view" in the Share modal to generate a public URL; guests see a clean read-only view with no login required; revoke the link at any time' },
+      { type: 'feature', description: 'Offline Support — Studio pages are readable and writable with no internet connection; changes are saved locally and automatically synced back to the server when you reconnect' },
+      { type: 'improvement', description: 'Studio pages are now persisted in the server database instead of browser localStorage — data is safe across devices, browsers, and deploys' },
+      { type: 'improvement', description: 'Offline indicator chip appears in the editor when disconnected so you always know your connection status' },
+    ],
+  },
+  {
     version: '8.1.0',
     date: 'March 6, 2026',
     title: 'Email Bulk Import & Contact Export',
@@ -257,7 +274,7 @@ export function Changelog({ isCollapsed = false }: ChangelogProps) {
         {!isCollapsed && <span className="font-medium text-sm">What's New</span>}
         {!isCollapsed && (
           <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-violet-500 to-purple-600 text-white">
-            v8.0
+            v9.0
           </span>
         )}
       </button>

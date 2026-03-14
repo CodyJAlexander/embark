@@ -1223,6 +1223,186 @@ const articles: HowToArticle[] = [
       </div>
     ),
   },
+  // ── Studio ───────────────────────────────────────────────────────────────
+  {
+    id: 'studio-overview',
+    category: 'Studio',
+    title: 'Studio — Docs, Notes & Pages',
+    icon: '📝',
+    summary: 'Create pages, organize them in a tree, and write rich content',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Studio is Embark's built-in document workspace. Create pages for meeting notes, SOPs,
+          onboarding guides, or anything your team needs to write down — all organized in a
+          collapsible page tree in the sidebar.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Creating pages</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">+ New Page</span> in the Studio sidebar to create a top-level page.</li>
+            <li>Hover any page in the sidebar and click the <span className="font-medium text-gray-900 dark:text-white">+</span> icon to create a sub-page nested under it.</li>
+            <li>Right-click a page for options: rename, change icon, duplicate, pin, or delete.</li>
+            <li>Drag pages in the sidebar to reorder or nest them.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Editor basics</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Type <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono">/</kbd> anywhere in the editor to open the slash command menu — insert headings, lists, tables, callouts, images, dividers, and more.</li>
+            <li>Select text to reveal the bubble toolbar: bold, italic, underline, strikethrough, inline code, links, text color, and comment.</li>
+            <li>Use <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono">@</kbd> to mention a client — the chip links directly to their detail page.</li>
+            <li>Drag and drop an image into the editor to insert it inline.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Block types</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li><span className="font-medium text-gray-900 dark:text-white">Headings</span> (H1–H3), paragraphs, bullet and numbered lists, task lists (checkboxes)</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Toggle block</span> — collapsible section with a summary line and hidden body</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Callout</span> — color-coded (yellow, blue, green, red) info panel with a custom emoji icon</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Table</span> — grid with header row; click cells to edit</li>
+            <li><span className="font-medium text-gray-900 dark:text-white">Code block</span> — monospace code with language-class support</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Pin important pages to keep them at the top of the sidebar tree.</li>
+            <li>Use the Table of Contents panel (toolbar icon) to jump between headings in long documents.</li>
+            <li>Word count is shown in the toolbar.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'studio-collaboration',
+    category: 'Studio',
+    title: 'Real-Time Collaboration & Live Cursors',
+    icon: '👥',
+    summary: 'Edit pages together in real time and see where everyone is',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Multiple team members can edit the same Studio page at the same time. Changes appear
+          instantly for everyone — no refresh needed, no conflicting versions.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Live cursors</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Each collaborator's cursor appears as a colored vertical bar with a floating name + emoji label.</li>
+            <li>Cursor colors are chosen by each user — they persist across sessions.</li>
+            <li>Presence chips (circular avatars) in the editor header show everyone currently on the page. Hover to see their name. If more than 4 people are present, a "+N" chip appears.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Customizing your cursor</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Click the <span className="font-medium text-gray-900 dark:text-white">cursor swatch button</span> in the editor toolbar (shows your current color).</li>
+            <li>Pick one of the 12 preset colors.</li>
+            <li>Optionally pick an emoji label that shows next to your name in the cursor pill.</li>
+            <li>Your choice is saved automatically — no need to set it again next session.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Offline editing</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Studio works without an internet connection. A small <span className="font-medium text-gray-900 dark:text-white">● Offline — changes saved locally</span> chip
+            appears in the editor when disconnected. When you reconnect, all edits are automatically
+            merged with the server — no data is lost and no manual sync is needed.
+          </p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Collaboration uses conflict-free merging (CRDT) — even if two people edit the same sentence simultaneously, both edits are preserved correctly.</li>
+            <li>Undo/redo is per-user — your <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono">Ctrl+Z</kbd> only undoes your own changes.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'studio-history-sharing',
+    category: 'Studio',
+    title: 'Version History & Page Sharing',
+    icon: '🕐',
+    summary: 'Browse past versions of a page and share it with anyone',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Studio automatically saves snapshots of every page as it's edited. You can browse the
+          full timeline, preview any past version, and restore it with one click.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Version history</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Open any page and click the <span className="font-medium text-gray-900 dark:text-white">History</span> button (clock icon) in the toolbar.</li>
+            <li>A panel slides in on the right showing all saved snapshots with timestamps and author names.</li>
+            <li>Click any snapshot to preview it in read-only mode — the editor shows that version's content.</li>
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">Restore this version</span> to apply it as the current content. The current state is saved as a new snapshot before restoring, so nothing is lost.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Sharing a page publicly</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Click the <span className="font-medium text-gray-900 dark:text-white">Share</span> button (chain icon) in the toolbar.</li>
+            <li>Toggle <span className="font-medium text-gray-900 dark:text-white">Anyone with link can view</span> to ON.</li>
+            <li>Copy the generated URL and send it to anyone — no Embark account required to view.</li>
+            <li>Toggle it back OFF at any time to revoke access. The old link immediately stops working.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Public pages are read-only — guests can't edit, comment, or see the sidebar.</li>
+            <li>Up to 50 version snapshots are kept per page; the oldest are pruned automatically.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'studio-comments',
+    category: 'Studio',
+    title: 'Inline Comments & Annotations',
+    icon: '💬',
+    summary: 'Anchor threaded comments to specific text in a page',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Comments in Studio are anchored to specific text ranges — just like in Google Docs. The
+          selected text is highlighted in yellow, and the discussion lives in a sidebar panel.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Adding a comment</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Select any text in the editor.</li>
+            <li>Click the <span className="font-medium text-gray-900 dark:text-white">💬 Comment</span> button in the bubble toolbar that appears above the selection.</li>
+            <li>Type your comment in the input that appears and press <kbd className="px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono">Enter</kbd> or click Submit.</li>
+            <li>The selected text turns yellow and your comment appears in the Comments sidebar.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Replying and resolving</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Open the <span className="font-medium text-gray-900 dark:text-white">Comments</span> panel (speech-bubble icon in the toolbar) to see all open comments sorted by position in the document.</li>
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">Reply</span> under any comment to add a response in the thread.</li>
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">Resolve</span> to close a comment thread — the yellow highlight is removed from the text automatically.</li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Only two levels of nesting are supported (comment → reply) to keep threads readable.</li>
+            <li>Comments are saved to the server — all collaborators see them in real time.</li>
+            <li>Resolved comments are removed from the sidebar but the record is kept in the database.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
   {
     id: 'settings',
     category: 'Team & More',
