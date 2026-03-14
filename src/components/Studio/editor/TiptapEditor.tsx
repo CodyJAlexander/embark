@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import './tiptap-editor.css';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -18,6 +18,7 @@ import type { JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
+import { IndexeddbPersistence } from 'y-indexeddb';
 import { SlashExtension } from './SlashExtension';
 import { SlashMenu } from './SlashMenu';
 import { BubbleToolbar } from './BubbleToolbar';
@@ -71,13 +72,31 @@ export function TiptapEditor({ pageId, currentUser, onChange, editable = true, i
     );
   }, [pageId, ydoc, editable]);
 
-  // Destroy provider and ydoc when pageId changes or component unmounts
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    if (!provider) return;
+    const handleStatus = ({ status }: { status: string }) => {
+      setIsOffline(status === 'disconnected');
+    };
+    provider.on('status', handleStatus);
+    return () => provider.off('status', handleStatus);
+  }, [provider]);
+
+  // Local IndexedDB cache — fast initial load + offline writes
+  const idbPersistence = useMemo(() => {
+    if (!editable) return null;
+    return new IndexeddbPersistence(`embark-page-${pageId}`, ydoc);
+  }, [pageId, ydoc, editable]);
+
+  // Destroy provider, idbPersistence, and ydoc when pageId changes or component unmounts
   useEffect(() => {
     return () => {
       provider?.destroy();
+      idbPersistence?.destroy();
       ydoc.destroy();
     };
-  }, [provider, ydoc]);
+  }, [provider, idbPersistence, ydoc]);
 
   // Notify parent when provider changes (used for presence/awareness)
   useEffect(() => {
@@ -175,6 +194,12 @@ export function TiptapEditor({ pageId, currentUser, onChange, editable = true, i
     <div className="tiptap-editor" onClick={handleChipClick}>
       <BubbleToolbar editor={editor} onAddComment={onAddComment} />
       <SlashMenu editor={editor} />
+      {isOffline && (
+        <div className="flex items-center gap-1.5 mb-2 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded-[3px] text-xs text-zinc-400 w-fit">
+          <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 flex-shrink-0" />
+          Offline — changes saved locally
+        </div>
+      )}
       <EditorContent editor={editor} />
     </div>
   );
