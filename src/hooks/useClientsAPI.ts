@@ -70,8 +70,8 @@ export function useClientsAPI() {
   // Load all clients on mount
   useEffect(() => {
     if (!currentUser) { setLoading(false); return; }
-    api.get<{ data: ApiClientRow[] }>('/api/v1/clients?limit=500')
-      .then(res => { if (res.data?.data) setClients(res.data.data.map(apiRowToClient)); })
+    api.get<ApiClientRow[]>('/api/v1/clients?limit=500')
+      .then(res => { if (res.data) setClients(res.data.map(apiRowToClient)); })
       .finally(() => setLoading(false));
   }, [currentUser?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
