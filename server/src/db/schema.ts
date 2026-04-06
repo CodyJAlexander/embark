@@ -4,6 +4,15 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
+// ─── TEAMS ───────────────────────────────────────────
+export const teams = pgTable('teams', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  name:       text('name').notNull(),
+  inviteCode: text('invite_code').notNull().unique(),
+  createdBy:  uuid('created_by'),  // FK to users.id — enforced in migration, not here (avoids circular ref)
+  createdAt:  timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ─── AUTH ────────────────────────────────────────────
 export const users = pgTable('users', {
   id:                 uuid('id').primaryKey().defaultRandom(),
@@ -13,7 +22,7 @@ export const users = pgTable('users', {
   role:               text('role').notNull().default('member'),
   avatarUrl:          text('avatar_url'),
   characterClass:     text('character_class'),
-  teamId:             uuid('team_id'),
+  teamId:             uuid('team_id').references(() => teams.id, { onDelete: 'set null' }),
   onboardingComplete: boolean('onboarding_complete').notNull().default(false),
   preferences:        jsonb('preferences').notNull().default({}),
   createdAt:          timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

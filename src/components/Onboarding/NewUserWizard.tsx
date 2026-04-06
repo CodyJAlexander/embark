@@ -1,7 +1,7 @@
 import { useState, useRef, type ChangeEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useTeam } from '../../hooks/useTeam';
 import { useGamificationContext } from '../../context/GamificationContext';
+import { api } from '../../lib/api';
 import { BuildADash } from '../Dashboard/BuildADash';
 import type { CharacterClass, DashboardWidgetId } from '../../types';
 import { DEFAULT_DASHBOARD_WIDGETS } from '../../types';
@@ -30,9 +30,15 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
+interface ServerTeam {
+  id: string;
+  name: string;
+  inviteCode: string;
+  members: Array<{ id: string; username: string; email: string; avatarUrl?: string }>;
+}
+
 export function NewUserWizard() {
   const { currentUser, updateUser } = useAuth();
-  const { teams, createTeam } = useTeam();
   const { selectClass } = useGamificationContext();
 
   const [step, setStep] = useState(0);
@@ -43,8 +49,13 @@ export function NewUserWizard() {
   const [selectedWidgets, setSelectedWidgets] = useState<DashboardWidgetId[]>(
     currentUser?.dashboardConfig?.visibleWidgets ?? DEFAULT_DASHBOARD_WIDGETS
   );
-  const [newTeamName, setNewTeamName] = useState('');
-  const [showNewTeamForm, setShowNewTeamForm] = useState(false);
+  // Team step state
+  const [teamMode, setTeamMode] = useState<'create' | 'join'>('create');
+  const [teamName, setTeamName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [teamLoading, setTeamLoading] = useState(false);
+  const [teamError, setTeamError] = useState<string | null>(null);
+  const [joinedTeam, setJoinedTeam] = useState<ServerTeam | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!currentUser) return null;
@@ -63,16 +74,28 @@ export function NewUserWizard() {
     reader.readAsDataURL(file);
   };
 
-  const handleJoinTeam = (teamId: string) => {
-    updateUser({ teamId });
-  };
-
-  const handleCreateTeam = () => {
-    if (!newTeamName.trim()) return;
-    const team = createTeam(newTeamName.trim());
-    updateUser({ teamId: team.id });
-    setShowNewTeamForm(false);
-    setNewTeamName('');
+  const handleTeamAction = async () => {
+    if (teamLoading) return;
+    setTeamError(null);
+    setTeamLoading(true);
+    try {
+      let res;
+      if (teamMode === 'create') {
+        if (!teamName.trim()) { setTeamError('Enter a team name.'); return; }
+        res = await api.post<ServerTeam>('/api/v1/teams', { name: teamName.trim() });
+      } else {
+        if (!inviteCode.trim()) { setTeamError('Enter an invite code.'); return; }
+        res = await api.post<ServerTeam>('/api/v1/teams/join', { inviteCode: inviteCode.trim() });
+      }
+      if (res.error || !res.data) {
+        setTeamError(res.error ?? 'Something went wrong. Try again.');
+        return;
+      }
+      setJoinedTeam(res.data);
+      await updateUser({ teamId: res.data.id });
+    } finally {
+      setTeamLoading(false);
+    }
   };
 
   const handleFinish = () => {
@@ -194,65 +217,84 @@ export function NewUserWizard() {
         {/* Step 2: Team */}
         {step === 2 && (
           <div>
-            <h2 className="text-2xl font-black text-white mb-1">Join a Team</h2>
+            <h2 className="text-2xl font-black text-white mb-1">Your Team</h2>
             <p className="text-zinc-400 mb-6 text-sm">Collaborate with your colleagues on client onboarding.</p>
 
-            <div className="space-y-2 max-h-56 overflow-y-auto mb-4">
-              {teams.length === 0 && !showNewTeamForm && (
-                <p className="text-zinc-500 text-sm text-center py-4">No teams yet. Create the first one below.</p>
-              )}
-              {teams.map(team => (
-                <div key={team.id} className="flex items-center justify-between bg-zinc-800 border border-zinc-700 rounded-[4px] px-4 py-3">
+            {joinedTeam ? (
+              <div className="p-4 bg-green-900/30 border-2 border-green-500 rounded-[4px] space-y-3">
+                <p className="font-bold text-green-300">✓ {teamMode === 'create' ? 'Team created' : 'Joined'}: {joinedTeam.name}</p>
+                {teamMode === 'create' && (
                   <div>
-                    <p className="font-semibold text-white">{team.name}</p>
-                    <p className="text-xs text-zinc-400">{team.members.length} member{team.members.length !== 1 ? 's' : ''}</p>
+                    <p className="text-xs text-zinc-400 mb-1">Share this invite code with your teammates:</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 bg-zinc-800 border border-zinc-600 rounded px-3 py-2 text-yellow-400 font-mono text-lg tracking-widest">
+                        {joinedTeam.inviteCode}
+                      </code>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(joinedTeam.inviteCode)}
+                        className="text-xs text-zinc-400 hover:text-white border border-zinc-600 rounded px-2 py-2 transition-colors"
+                        title="Copy invite code"
+                      >
+                        Copy
+                      </button>
+                    </div>
                   </div>
-                  {currentUser.teamId === team.id ? (
-                    <span className="text-yellow-400 text-xs font-bold">✓ Joined</span>
-                  ) : (
-                    <button
-                      onClick={() => handleJoinTeam(team.id)}
-                      className="text-xs font-bold bg-yellow-400 hover:bg-yellow-300 text-zinc-900 px-3 py-1 rounded-[4px] border border-zinc-900 shadow-[1px_1px_0_0_#18181b] transition-all"
-                    >
-                      Join
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {!showNewTeamForm ? (
-              <button
-                onClick={() => setShowNewTeamForm(true)}
-                className="w-full border-2 border-dashed border-zinc-600 hover:border-yellow-400 rounded-[4px] py-3 text-zinc-400 hover:text-yellow-400 text-sm font-medium transition-colors"
-              >
-                + Create a new team
-              </button>
-            ) : (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newTeamName}
-                  onChange={e => setNewTeamName(e.target.value)}
-                  placeholder="Team name"
-                  autoFocus
-                  className="flex-1 bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white focus:outline-none focus:border-yellow-400 transition-colors"
-                  onKeyDown={e => { if (e.key === 'Enter') handleCreateTeam(); if (e.key === 'Escape') setShowNewTeamForm(false); }}
-                />
-                <button
-                  onClick={handleCreateTeam}
-                  className="bg-yellow-400 hover:bg-yellow-300 text-zinc-900 font-bold px-4 py-2 rounded-[4px] border-2 border-zinc-900 shadow-[2px_2px_0_0_#18181b] transition-all"
-                >
-                  Create
-                </button>
-                <button onClick={() => setShowNewTeamForm(false)} className="text-zinc-400 hover:text-white px-2 transition-colors">✕</button>
+                )}
+                <p className="text-xs text-zinc-400">{joinedTeam.members.length} member{joinedTeam.members.length !== 1 ? 's' : ''}</p>
               </div>
+            ) : (
+              <>
+                {/* Mode toggle */}
+                <div className="flex border-2 border-zinc-700 rounded-[4px] mb-4 overflow-hidden">
+                  {(['create', 'join'] as const).map(mode => (
+                    <button
+                      key={mode}
+                      onClick={() => { setTeamMode(mode); setTeamError(null); }}
+                      className={`flex-1 py-2 text-sm font-bold transition-colors ${teamMode === mode ? 'bg-yellow-400 text-zinc-900' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
+                    >
+                      {mode === 'create' ? 'Create a team' : 'Join a team'}
+                    </button>
+                  ))}
+                </div>
+
+                {teamMode === 'create' ? (
+                  <input
+                    type="text"
+                    value={teamName}
+                    onChange={e => setTeamName(e.target.value)}
+                    placeholder="Team name (e.g. InterWorks CS)"
+                    autoFocus
+                    className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white focus:outline-none focus:border-yellow-400 transition-colors"
+                    onKeyDown={e => { if (e.key === 'Enter') void handleTeamAction(); }}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={inviteCode}
+                    onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                    placeholder="Invite code (e.g. A1B2C3D4)"
+                    autoFocus
+                    className="w-full bg-zinc-800 border-2 border-zinc-600 rounded-[4px] px-3 py-2 text-white font-mono tracking-widest focus:outline-none focus:border-yellow-400 transition-colors uppercase"
+                    onKeyDown={e => { if (e.key === 'Enter') void handleTeamAction(); }}
+                  />
+                )}
+
+                {teamError && <p className="text-xs text-red-400 mt-2">{teamError}</p>}
+
+                <button
+                  onClick={() => void handleTeamAction()}
+                  disabled={teamLoading}
+                  className="mt-3 w-full bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-zinc-900 font-bold px-4 py-2 rounded-[4px] border-2 border-zinc-900 shadow-[2px_2px_0_0_#18181b] transition-all"
+                >
+                  {teamLoading ? '…' : teamMode === 'create' ? 'Create Team' : 'Join Team'}
+                </button>
+              </>
             )}
 
             <div className="flex justify-between mt-8">
               <button onClick={back} className="text-zinc-400 hover:text-white text-sm transition-colors">← Back</button>
               <div className="flex gap-3">
-                <button onClick={next} className="text-zinc-400 hover:text-white text-sm transition-colors">Skip for now</button>
+                {!joinedTeam && <button onClick={next} className="text-zinc-400 hover:text-white text-sm transition-colors">Skip for now</button>}
                 <button
                   onClick={next}
                   className="bg-yellow-400 hover:bg-yellow-300 text-zinc-900 font-bold px-6 py-2 rounded-[4px] border-2 border-zinc-900 shadow-[2px_2px_0_0_#18181b] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"

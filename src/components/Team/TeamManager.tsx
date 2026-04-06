@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTeam } from '../../hooks/useTeam';
 import { useAssignmentRoles } from '../../hooks/useAssignmentRoles';
+import { useAuth } from '../../context/AuthContext';
+import { api } from '../../lib/api';
 import { TeamMemberAvatar } from './TeamMemberAvatar';
 import { CapacityView } from '../Views/CapacityView';
 import type { TeamMember, TeamRole, AssignmentRole, Team } from '../../types';
@@ -57,6 +59,54 @@ export function TeamManager() {
   const [newTeamName, setNewTeamName] = useState('');
   const [showDeleteTeamConfirm, setShowDeleteTeamConfirm] = useState<string | null>(null);
 
+  // ── Embark backend team ────────────────────────────────────────────────────
+  const { updateUser } = useAuth();
+  interface ServerTeam {
+    id: string; name: string; inviteCode: string;
+    members: Array<{ id: string; username: string; email: string; avatarUrl?: string }>;
+  }
+  const [serverTeam, setServerTeam] = useState<ServerTeam | null | undefined>(undefined); // undefined = loading
+  const [serverTeamMode, setServerTeamMode] = useState<'create' | 'join'>('create');
+  const [serverTeamName, setServerTeamName] = useState('');
+  const [serverInviteCode, setServerInviteCode] = useState('');
+  const [serverTeamLoading, setServerTeamLoading] = useState(false);
+  const [serverTeamError, setServerTeamError] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  useEffect(() => {
+    api.get<ServerTeam>('/api/v1/teams/me').then(res => {
+      setServerTeam(res.data ?? null);
+    }).catch(() => setServerTeam(null));
+  }, []);
+
+  const handleServerTeamAction = async () => {
+    if (serverTeamLoading) return;
+    setServerTeamError(null);
+    setServerTeamLoading(true);
+    try {
+      let res;
+      if (serverTeamMode === 'create') {
+        if (!serverTeamName.trim()) { setServerTeamError('Enter a team name.'); return; }
+        res = await api.post<ServerTeam>('/api/v1/teams', { name: serverTeamName.trim() });
+      } else {
+        if (!serverInviteCode.trim()) { setServerTeamError('Enter an invite code.'); return; }
+        res = await api.post<ServerTeam>('/api/v1/teams/join', { inviteCode: serverInviteCode.trim() });
+      }
+      if (res.error || !res.data) { setServerTeamError(res.error ?? 'Something went wrong.'); return; }
+      setServerTeam(res.data);
+      await updateUser({ teamId: res.data.id });
+    } finally {
+      setServerTeamLoading(false);
+    }
+  };
+
+  const copyInviteCode = () => {
+    if (!serverTeam?.inviteCode) return;
+    navigator.clipboard.writeText(serverTeam.inviteCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
   // Allow team management if: no members yet, user is admin/owner, or no current user is set (localStorage-only app)
   const canManageTeam = members.length === 0 || hasPermission('admin') || !currentUser;
 
@@ -87,6 +137,92 @@ export function TeamManager() {
   };
 
   return (
+    <div className="space-y-6">
+    {/* ── Embark Team (backend, shared visibility) ───────────────────────── */}
+    <div className="glass-card p-5">
+      <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Embark Team</h2>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        Create or join a shared team so all members see the same clients.
+      </p>
+
+      {serverTeam === undefined ? (
+        <p className="text-sm text-gray-400">Loading…</p>
+      ) : serverTeam ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-gray-900 dark:text-white">{serverTeam.name}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">·</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">{serverTeam.members.length} member{serverTeam.members.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 dark:text-gray-400">Invite code:</span>
+            <code className="px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded font-mono text-sm text-yellow-600 dark:text-yellow-400 tracking-widest border border-zinc-200 dark:border-zinc-700">
+              {serverTeam.inviteCode}
+            </code>
+            <button
+              onClick={copyInviteCode}
+              className="text-xs px-2 py-1 border border-gray-300 dark:border-zinc-600 rounded hover:border-gray-500 dark:hover:border-zinc-400 text-gray-600 dark:text-gray-400 transition-colors"
+            >
+              {copiedCode ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {serverTeam.members.map(m => (
+              <div key={m.id} className="flex items-center gap-1.5 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-zinc-800 rounded px-2 py-1">
+                {m.avatarUrl
+                  ? <img src={m.avatarUrl} className="w-4 h-4 rounded-full object-cover" alt="" />
+                  : <span className="w-4 h-4 rounded-full bg-violet-500 flex items-center justify-center text-white text-[9px] font-bold">{m.username[0].toUpperCase()}</span>
+                }
+                {m.username}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="flex border border-gray-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+            {(['create', 'join'] as const).map(mode => (
+              <button
+                key={mode}
+                onClick={() => { setServerTeamMode(mode); setServerTeamError(null); }}
+                className={`flex-1 py-1.5 text-xs font-semibold transition-colors ${serverTeamMode === mode ? 'bg-violet-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800'}`}
+              >
+                {mode === 'create' ? 'Create team' : 'Join team'}
+              </button>
+            ))}
+          </div>
+          {serverTeamMode === 'create' ? (
+            <input
+              type="text"
+              value={serverTeamName}
+              onChange={e => setServerTeamName(e.target.value)}
+              placeholder="Team name"
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+              onKeyDown={e => { if (e.key === 'Enter') void handleServerTeamAction(); }}
+            />
+          ) : (
+            <input
+              type="text"
+              value={serverInviteCode}
+              onChange={e => setServerInviteCode(e.target.value.toUpperCase())}
+              placeholder="Invite code"
+              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono tracking-widest focus:ring-2 focus:ring-violet-500 uppercase"
+              onKeyDown={e => { if (e.key === 'Enter') void handleServerTeamAction(); }}
+            />
+          )}
+          {serverTeamError && <p className="text-xs text-red-500">{serverTeamError}</p>}
+          <button
+            onClick={() => void handleServerTeamAction()}
+            disabled={serverTeamLoading}
+            className="px-4 py-2 text-sm font-medium bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-lg transition-colors"
+          >
+            {serverTeamLoading ? '…' : serverTeamMode === 'create' ? 'Create Team' : 'Join Team'}
+          </button>
+        </div>
+      )}
+    </div>
+
+    {/* ── Assignment teams / members (existing localStorage-based section) ── */}
     <div className="flex gap-6 h-full">
       {/* Left Sidebar - Teams List */}
       <div className="w-64 flex-shrink-0">
@@ -1017,6 +1153,7 @@ function RoleFormModal({ role, onSave, onClose }: RoleFormModalProps) {
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 }

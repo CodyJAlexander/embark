@@ -5,13 +5,22 @@ import {
   clients, clientContacts, clientAssignments, accountInfo,
   customFields, checklistItems, onboardingPhases, milestones,
   successPlans, successPlanTasks, communicationLog,
-  clientServices, clientTags, tags,
+  clientServices, clientTags, tags, users,
 } from '../db/schema.js';
-import { eq, and, ilike, sql, count } from 'drizzle-orm';
+import { eq, and, ilike, inArray, sql, count } from 'drizzle-orm';
 import { paginate, paginatedResponse } from '../lib/pagination.js';
 import type { AppEnv } from '../types.js';
 
 export const clientRoutes = new Hono<AppEnv>();
+
+// Returns the set of user IDs whose clients the requesting user may access.
+// If the user belongs to a team, returns all team member IDs; otherwise just the user's own ID.
+async function getTeamScope(userId: string): Promise<string[]> {
+  const [u] = await db.select({ teamId: users.teamId }).from(users).where(eq(users.id, userId)).limit(1);
+  if (!u?.teamId) return [userId];
+  const members = await db.select({ id: users.id }).from(users).where(eq(users.teamId, u.teamId));
+  return members.map(m => m.id);
+}
 
 const clientSchema = z.object({
   id:             z.string().uuid().optional(),   // client-generated UUID
@@ -31,8 +40,9 @@ clientRoutes.get('/', async (c) => {
   const { page, limit, offset } = paginate(c.req.query());
   const { status, lifecycle, assignedTo, search } = c.req.query();
 
+  const scope = await getTeamScope(userId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const conditions: any[] = [eq(clients.createdBy, userId)];
+  const conditions: any[] = [inArray(clients.createdBy, scope)];
   if (status)     conditions.push(eq(clients.status, status));
   if (lifecycle)  conditions.push(eq(clients.lifecycleStage, lifecycle));
   if (assignedTo) conditions.push(eq(clients.assignedTo, assignedTo));
@@ -53,9 +63,12 @@ clientRoutes.get('/', async (c) => {
 // ─── Get client ───────────────────────────────────────
 clientRoutes.get('/:id', async (c) => {
   const userId = c.get('userId');
-  const [client] = await db.select().from(clients)
-    .where(and(eq(clients.id, c.req.param('id')), eq(clients.createdBy, userId))).limit(1);
+  const [client] = await db.select().from(clients).where(eq(clients.id, c.req.param('id'))).limit(1);
   if (!client) return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
+  const scope = await getTeamScope(userId);
+  if (!client.createdBy || !scope.includes(client.createdBy)) {
+    return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
+  }
   return c.json({ data: client, error: null });
 });
 
@@ -83,10 +96,11 @@ clientRoutes.patch('/:id', async (c) => {
   if (!parsed.success) {
     return c.json({ data: null, error: 'Validation failed', code: 'VALIDATION_ERROR' }, 422);
   }
+  const scope = await getTeamScope(userId);
   const { id: _id, ...rest } = parsed.data;
   const [client] = await db.update(clients)
     .set({ ...rest, updatedAt: new Date() })
-    .where(and(eq(clients.id, c.req.param('id')), eq(clients.createdBy, userId)))
+    .where(and(eq(clients.id, c.req.param('id')), inArray(clients.createdBy, scope)))
     .returning();
   if (!client) return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
   return c.json({ data: client, error: null });
@@ -95,8 +109,9 @@ clientRoutes.patch('/:id', async (c) => {
 // ─── Delete client ────────────────────────────────────
 clientRoutes.delete('/:id', async (c) => {
   const userId = c.get('userId');
+  const scope = await getTeamScope(userId);
   const [deleted] = await db.delete(clients)
-    .where(and(eq(clients.id, c.req.param('id')), eq(clients.createdBy, userId)))
+    .where(and(eq(clients.id, c.req.param('id')), inArray(clients.createdBy, scope)))
     .returning({ id: clients.id });
   if (!deleted) return c.json({ data: null, error: 'Not found', code: 'NOT_FOUND' }, 404);
   return c.json({ data: { id: deleted.id }, error: null });

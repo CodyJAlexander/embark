@@ -36,6 +36,7 @@ userRoutes.patch('/:id', async (c) => {
     characterClass: z.string().optional(),
     preferences: z.record(z.unknown()).optional(),
     onboardingComplete: z.boolean().optional(),
+    teamId: z.string().uuid().nullable().optional(),
   });
   const parsed = schema.safeParse(body);
   if (!parsed.success) return c.json({ data: null, error: 'Validation failed', details: parsed.error.flatten() }, 422);
@@ -45,6 +46,7 @@ userRoutes.patch('/:id', async (c) => {
       id: users.id, email: users.email, username: users.username,
       role: users.role, avatarUrl: users.avatarUrl, characterClass: users.characterClass,
       onboardingComplete: users.onboardingComplete, preferences: users.preferences,
+      teamId: users.teamId,
     });
   if (!row) return c.json({ data: null, error: 'Not found' }, 404);
   return c.json({ data: row, error: null });
