@@ -7,6 +7,7 @@ import { eq, or } from 'drizzle-orm';
 import { signToken } from '../lib/jwt.js';
 import { createHash } from 'crypto';
 import type { AppEnv } from '../types.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 export const authRoutes = new Hono<AppEnv>();
 
@@ -85,7 +86,7 @@ authRoutes.post('/logout', async (c) => {
   return c.json({ data: { ok: true }, error: null });
 });
 
-authRoutes.get('/me', async (c) => {
+authRoutes.get('/me', authMiddleware, async (c) => {
   const userId = c.get('userId');
   if (!userId) return c.json({ data: null, error: 'Unauthorized', code: 'UNAUTHORIZED' }, 401);
 
