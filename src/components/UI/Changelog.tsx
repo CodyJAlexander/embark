@@ -12,6 +12,20 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
+    version: '9.1.0',
+    date: 'April 6, 2026',
+    title: 'Teams & Spreadsheet Import',
+    changes: [
+      { type: 'feature', description: 'Backend Teams — create a shared team during onboarding or from Settings → Team; all team members instantly see the same clients without any extra setup' },
+      { type: 'feature', description: 'Invite Codes — create a team to get an 8-character invite code; share it with colleagues so they can join during their own onboarding or from the Team view' },
+      { type: 'feature', description: 'Embark Team section in Settings → Team — shows your team name, invite code with copy button, and a live member list; lets you create or join a team at any time after onboarding' },
+      { type: 'feature', description: 'Spreadsheet Upload for Email Bulk Import — upload .xlsx, .xls, or .csv files directly in Settings → Data; Embark scans every cell across all sheets for email addresses and populates the import field automatically' },
+      { type: 'improvement', description: 'Onboarding wizard step 2 now calls the real backend to create or join a team; invite code is shown immediately with a copy button after team creation' },
+      { type: 'fix', description: 'Users staying logged in across browser refreshes — fixed session verification on the /me endpoint' },
+      { type: 'fix', description: 'Clients persisting after page reload — fixed client list query to correctly read paginated API response' },
+    ],
+  },
+  {
     version: '9.0.0',
     date: 'March 13, 2026',
     title: 'Studio v5 — Live Collaboration',
@@ -274,7 +288,7 @@ export function Changelog({ isCollapsed = false }: ChangelogProps) {
         {!isCollapsed && <span className="font-medium text-sm">What's New</span>}
         {!isCollapsed && (
           <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-violet-500 to-purple-600 text-white">
-            v9.0
+            v9.1
           </span>
         )}
       </button>
