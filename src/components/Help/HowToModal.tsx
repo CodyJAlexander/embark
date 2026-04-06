@@ -1189,9 +1189,9 @@ const articles: HowToArticle[] = [
     content: (
       <div className="space-y-5">
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-          The Data tab in Settings lets you paste a list of email addresses and Embark will
-          automatically group them by domain into named client drafts — so you can onboard a whole
-          batch of contacts without going through the intake wizard one at a time.
+          The Data tab in Settings lets you paste a list of email addresses — or upload a spreadsheet
+          directly — and Embark will automatically group them by domain into named client drafts, so
+          you can onboard a whole batch of contacts without going through the intake wizard one at a time.
         </p>
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white mb-2">How to bulk import</h3>
@@ -1218,6 +1218,94 @@ const articles: HowToArticle[] = [
             <li>Invalid emails (no @ sign, missing domain, etc.) are shown in a warning list and skipped — they won't block the rest of the import.</li>
             <li>Duplicate emails in your paste are automatically deduplicated.</li>
             <li>You can rename the auto-generated client name (e.g. change "Interworks" to "InterWorks, Inc.") before confirming.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'spreadsheet-import',
+    category: 'Team & More',
+    title: 'Importing Clients from a Spreadsheet',
+    icon: '📊',
+    summary: 'Upload an Excel or CSV file to bulk-create clients from email addresses',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          If you have an existing spreadsheet of clients and their emails, you can upload it directly
+          in Settings → Data. Embark scans every cell across every sheet for email addresses, extracts
+          them automatically, and feeds them into the same domain-grouping import flow.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">How to import from a spreadsheet</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>Open <span className="font-medium text-gray-900 dark:text-white">Settings → Data</span>.</li>
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">Upload Spreadsheet</span> and select your <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">.xlsx</code>, <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">.xls</code>, or <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">.csv</code> file.</li>
+            <li>Embark reads all sheets and cells — you'll see a confirmation like <span className="font-medium text-gray-900 dark:text-white">"clients.xlsx — 42 emails found"</span>.</li>
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">Parse Emails</span>. Embark groups addresses by domain into named client drafts.</li>
+            <li>Fill in contact names in the preview, then confirm to create the clients.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">What columns does my spreadsheet need?</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            None — Embark looks for email-shaped values (<code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">something@domain.com</code>) anywhere in the file.
+            Your spreadsheet can have names, phone numbers, and other data mixed in — only valid email addresses are extracted.
+          </p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Multiple sheets are fully supported — all sheets are scanned in order.</li>
+            <li>Duplicate emails across rows or sheets are automatically deduplicated.</li>
+            <li>You can still paste emails manually in the text area if you prefer — both paths work side-by-side.</li>
+            <li>Domains that already have clients in Embark are flagged with a yellow <span className="font-medium text-yellow-700 dark:text-yellow-400">EXISTS</span> badge; those contacts will be added to the existing client.</li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'embark-teams',
+    category: 'Team & More',
+    title: 'Embark Teams — Shared Client Access',
+    icon: '👥',
+    summary: 'Create or join a team so everyone sees the same clients',
+    content: (
+      <div className="space-y-5">
+        <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          Embark Teams let multiple users share a single pool of clients. Once you're on the same team,
+          every member can see, edit, and create clients that everyone else sees — no manual sharing required.
+        </p>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Creating a team</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>During onboarding (step 2) or from <span className="font-medium text-gray-900 dark:text-white">Settings → Team</span>, click the <span className="font-medium text-gray-900 dark:text-white">Create team</span> tab.</li>
+            <li>Enter a team name and click <span className="font-medium text-gray-900 dark:text-white">Create Team</span>.</li>
+            <li>An 8-character invite code is shown immediately — copy it and share it with your teammates.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Joining a team</h3>
+          <ol className="space-y-2 text-sm text-gray-600 dark:text-gray-300 list-decimal list-inside">
+            <li>During onboarding (step 2) or from <span className="font-medium text-gray-900 dark:text-white">Settings → Team</span>, click the <span className="font-medium text-gray-900 dark:text-white">Join team</span> tab.</li>
+            <li>Paste or type the invite code your teammate shared with you.</li>
+            <li>Click <span className="font-medium text-gray-900 dark:text-white">Join Team</span> — you're in immediately.</li>
+          </ol>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Viewing your team</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Go to <span className="font-medium text-gray-900 dark:text-white">Settings → Team</span>. The <span className="font-medium text-gray-900 dark:text-white">Embark Team</span> section at
+            the top shows your team name, the invite code (with a copy button), and a list of all current members.
+          </p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Tips</h3>
+          <ul className="space-y-1.5 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
+            <li>Client visibility is automatic — once you're on the same team, all clients are shared immediately.</li>
+            <li>The invite code never expires and can be reused to add more teammates.</li>
+            <li>Users without a team only see their own clients; joining a team does not remove or hide their existing clients.</li>
           </ul>
         </div>
       </div>
