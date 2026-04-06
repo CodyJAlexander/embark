@@ -122,3 +122,25 @@ export function parseEmailInput(raw: string): { valid: string[]; invalid: string
 
   return { valid: deduped, invalid };
 }
+
+/**
+ * Reads an Excel (.xlsx / .xls) or CSV file and returns every cell value
+ * that looks like a valid email address, deduplicated and lowercased.
+ */
+export async function extractEmailsFromSpreadsheet(file: File): Promise<string[]> {
+  const XLSX = await import('xlsx');
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: 'array' });
+  const found: string[] = [];
+  for (const sheetName of workbook.SheetNames) {
+    const rows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets[sheetName], { header: 1 });
+    for (const row of rows) {
+      if (!Array.isArray(row)) continue;
+      for (const cell of row) {
+        const val = String(cell ?? '').trim();
+        if (isValidEmail(val)) found.push(val.toLowerCase());
+      }
+    }
+  }
+  return [...new Set(found)];
+}

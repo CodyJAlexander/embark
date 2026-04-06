@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useClientContext } from '../../context/ClientContext';
-import { parseEmailInput, groupEmailsByDomain, parseDomain, findExistingClientByDomain } from '../../utils/emailImport';
+import { parseEmailInput, groupEmailsByDomain, parseDomain, findExistingClientByDomain, extractEmailsFromSpreadsheet } from '../../utils/emailImport';
 import { generateId } from '../../utils/helpers';
 import type { Client } from '../../types';
 
@@ -27,6 +27,30 @@ export function EmailImportPanel() {
   const [invalidEmails, setInvalidEmails] = useState<string[]>([]);
   const [groups, setGroups] = useState<DomainGroup[]>([]);
   const [summary, setSummary] = useState<{ newClients: number; addedContacts: number } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<{ name: string; count: number } | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── File upload ─────────────────────────────────────────────────────────────
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = '';
+    if (!file) return;
+
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const emails = await extractEmailsFromSpreadsheet(file);
+      setRawInput(emails.join('\n'));
+      setUploadedFile({ name: file.name, count: emails.length });
+    } catch {
+      setUploadError('Could not read the file. Make sure it is a valid .xlsx, .xls, or .csv file.');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   // ── Stage 1: Parse ─────────────────────────────────────────────────────────
   function handleParse() {
@@ -128,6 +152,8 @@ export function EmailImportPanel() {
     setInvalidEmails([]);
     setGroups([]);
     setSummary(null);
+    setUploadedFile(null);
+    setUploadError(null);
   }
 
   const newCount = groups.filter((g) => !g.existingClient).length;
@@ -148,9 +174,48 @@ export function EmailImportPanel() {
       {/* ── Stage 1: Paste ── */}
       {stage === 'paste' && (
         <div className="space-y-3">
+          {/* File upload */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls,.csv"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="px-4 py-2 text-sm font-medium border-2 border-zinc-300 dark:border-zinc-600 rounded-[4px] text-gray-700 dark:text-gray-300 hover:border-zinc-900 dark:hover:border-white hover:text-gray-900 dark:hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              {uploading ? 'Reading file…' : 'Upload Spreadsheet'}
+            </button>
+            <span className="text-xs text-gray-400 dark:text-gray-500">.xlsx, .xls, .csv</span>
+          </div>
+
+          {uploadedFile && (
+            <p className="text-xs text-green-700 dark:text-green-400 font-medium">
+              ✓ {uploadedFile.name} — {uploadedFile.count} email{uploadedFile.count !== 1 ? 's' : ''} found
+            </p>
+          )}
+          {uploadError && (
+            <p className="text-xs text-red-600 dark:text-red-400">{uploadError}</p>
+          )}
+
+          <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+            <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700" />
+            <span>or paste manually</span>
+            <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700" />
+          </div>
+
           <textarea
             value={rawInput}
-            onChange={(e) => setRawInput(e.target.value)}
+            onChange={(e) => { setRawInput(e.target.value); setUploadedFile(null); }}
             rows={6}
             placeholder="calexander@interworks.com, jsmith@acme.com&#10;jdoe@acme.com; another@corp.io"
             className="w-full px-3 py-2 text-sm border-2 border-zinc-300 dark:border-zinc-600 rounded-[4px] bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-zinc-900 dark:focus:border-white resize-none font-mono"
