@@ -762,7 +762,6 @@ function MemberCard({ member, isCurrentUser, canEdit, onEdit, onDelete }: Member
         </div>
       )}
     </div>
-    </div>
   );
 }
 
