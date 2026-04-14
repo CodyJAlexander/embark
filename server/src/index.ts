@@ -31,6 +31,14 @@ app.use('*', logger());
 const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
   .split(',').map(o => o.trim()).filter(Boolean);
 
+// Tauri v2 serves the frontend from http://tauri.localhost — always allow it
+if (!allowedOrigins.includes('http://tauri.localhost')) {
+  allowedOrigins.push('http://tauri.localhost');
+}
+if (!allowedOrigins.includes('https://tauri.localhost')) {
+  allowedOrigins.push('https://tauri.localhost');
+}
+
 app.use('*', cors({
   origin: (origin) => (allowedOrigins.includes(origin) ? origin : allowedOrigins[0]),
   credentials: true,
