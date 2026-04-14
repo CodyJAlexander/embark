@@ -652,6 +652,7 @@ export interface StoredUser {
   teamId?: string;
   characterClass?: CharacterClass;
   dashboardConfig?: DashboardWidgetConfig;
+  preferences?: Record<string, unknown>;
   onboardingComplete: boolean;
   createdAt: string;
 }
