@@ -23,6 +23,7 @@
     "@floating-ui/dom": "^1.7.6",
     "@sentry/react": "^10.40.0",
     "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-deep-link": "^2.4.8",
     "@tiptap/extension-character-count": "^3.20.1",
     "@tiptap/extension-collaboration": "^3.20.1",
     "@tiptap/extension-collaboration-cursor": "^3.0.0",

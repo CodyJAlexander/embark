@@ -28,6 +28,7 @@ const SharedPage = lazy(() => import('./pages/SharedPage'));
 import type { View, Client } from './types';
 import { useSLAStatuses } from './hooks/useSLA';
 import { useAnomalyDetection } from './hooks/useAnomalyDetection';
+import { useDeepLinks } from './hooks/useDeepLinks';
 import { emit } from './events/appEvents';
 import { useWebhooks } from './hooks/useWebhooks';
 import { initWebhookDelivery } from './services/webhookDelivery';
@@ -161,6 +162,7 @@ function AppContent() {
   const [triggerAddClient, setTriggerAddClient] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
+  useDeepLinks();
   const { preferences, setLastDigestShown } = usePreferences();
   const { getCurrentPlayerState } = useGamificationContext();
   const [digestOpen, setDigestOpen] = useState(false);
