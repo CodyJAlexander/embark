@@ -258,6 +258,16 @@ function AppContent() {
                 onAddClientTriggered={handleAddClientTriggered}
               />
             )}
+            {currentView === 'onboarding-clients' && (
+              <ClientList
+                lockedLifecycleFilter="onboarding"
+                onNavigateAll={() => setCurrentView('clients')}
+                initialSelectedClientId={selectedClientId}
+                onClearInitialSelection={handleClearSelectedClient}
+                triggerAddClient={triggerAddClient}
+                onAddClientTriggered={handleAddClientTriggered}
+              />
+            )}
             {currentView === 'tasks' && <TasksView />}
             {currentView === 'board' && <GlobalTaskKanban />}
             {currentView === 'forms' && <FormsView />}

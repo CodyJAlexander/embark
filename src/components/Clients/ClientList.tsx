@@ -80,6 +80,8 @@ interface ClientListProps {
   onClearInitialSelection?: () => void;
   triggerAddClient?: boolean;
   onAddClientTriggered?: () => void;
+  lockedLifecycleFilter?: LifecycleStage;
+  onNavigateAll?: () => void;
 }
 
 export function ClientList({
@@ -87,6 +89,8 @@ export function ClientList({
   onClearInitialSelection,
   triggerAddClient,
   onAddClientTriggered,
+  lockedLifecycleFilter,
+  onNavigateAll,
 }: ClientListProps) {
   const { clients, bulkUpdateStatus, bulkUpdatePriority, bulkArchive, bulkDelete, bulkRestore, archiveClient, deleteClient, duplicateClient, updateStatus, updatePriority } = useClientContext();
   const { getHistory, getTrend, getDelta } = useHealthHistory(clients);
@@ -97,7 +101,7 @@ export function ClientList({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
-  const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleStage | 'all'>('all');
+  const [lifecycleFilter, setLifecycleFilter] = useState<LifecycleStage | 'all'>(lockedLifecycleFilter ?? 'all');
   const [currentView, setCurrentView] = useState<ClientView>('cards');
   const [showArchived, setShowArchived] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -501,7 +505,7 @@ export function ClientList({
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-display font-black text-gray-900 dark:text-gray-100">
-              {showArchived ? 'Archived Clients' : 'Client Onboardings'}
+              {showArchived ? 'Archived Clients' : lockedLifecycleFilter === 'onboarding' ? 'Onboarding Clients' : 'Client Onboardings'}
             </h2>
             {archivedClients.length > 0 && (
               <button
@@ -519,6 +523,17 @@ export function ClientList({
               </button>
             )}
           </div>
+          {onNavigateAll && (
+            <button
+              onClick={onNavigateAll}
+              className="text-xs text-gray-500 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-1 mt-0.5"
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              All Clients
+            </button>
+          )}
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {filteredClients.length} of {displayClients.length} client{displayClients.length !== 1 ? 's' : ''}
           </p>
@@ -611,20 +626,22 @@ export function ClientList({
               </select>
               <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
-            <div className="relative">
-              <select
-                value={lifecycleFilter}
-                onChange={(e) => { setLifecycleFilter(e.target.value as LifecycleStage | 'all'); handleFilterChange(); }}
-                className="appearance-none border-2 border-zinc-900 dark:border-zinc-600 shadow-[2px_2px_0_0_#18181b] rounded-[4px] bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-1.5 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              >
-                <option value="all">All Stages</option>
-                <option value="onboarding">Onboarding</option>
-                <option value="active-client">Active Client</option>
-                <option value="at-risk">At Risk</option>
-                <option value="churned">Churned</option>
-              </select>
-              <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </div>
+            {!lockedLifecycleFilter && (
+              <div className="relative">
+                <select
+                  value={lifecycleFilter}
+                  onChange={(e) => { setLifecycleFilter(e.target.value as LifecycleStage | 'all'); handleFilterChange(); }}
+                  className="appearance-none border-2 border-zinc-900 dark:border-zinc-600 shadow-[2px_2px_0_0_#18181b] rounded-[4px] bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-1.5 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                >
+                  <option value="all">All Stages</option>
+                  <option value="onboarding">Onboarding</option>
+                  <option value="active-client">Active Client</option>
+                  <option value="at-risk">At Risk</option>
+                  <option value="churned">Churned</option>
+                </select>
+                <svg className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-zinc-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            )}
             <SavedViewsManager
               savedViews={savedViews}
               pinnedViews={pinnedViews}
