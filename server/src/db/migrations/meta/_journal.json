@@ -43,6 +43,20 @@
       "when": 1773434861594,
       "tag": "0005_groovy_kulan_gath",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773500000000,
+      "tag": "0006_add_teams",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1773500001000,
+      "tag": "0007_fix_studio_columns",
+      "breakpoints": true
     }
   ]
 }
