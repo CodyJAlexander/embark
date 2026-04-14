@@ -33,3 +33,10 @@ dist-ssr
 
 # Git worktrees
 .worktrees/
+
+# Tauri build artifacts
+src-tauri/target
+src-tauri/gen
+
+# Tauri signing keys (NEVER commit the private key)
+src-tauri/.tauri-private.key

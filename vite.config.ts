@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'pwa-256x256.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Embark — Client Onboarding',
         short_name: 'Embark',
@@ -21,10 +21,25 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
+            src: 'pwa-256x256.png',
+            sizes: '256x256',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
             src: 'icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
           },
         ],
       },
@@ -51,6 +66,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+  },
+  // Ensure Tauri always finds the dev server on the expected port
+  server: {
+    port: 5173,
+    strictPort: true,
   },
   build: {
     rollupOptions: {
