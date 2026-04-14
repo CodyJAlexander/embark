@@ -52,6 +52,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
   },
+  // Ensure Tauri always finds the dev server on the expected port
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
   build: {
     rollupOptions: {
       output: {
