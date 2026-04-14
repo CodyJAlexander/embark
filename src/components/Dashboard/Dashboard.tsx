@@ -49,8 +49,9 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
   const [isReady, setIsReady] = useState(false);
   useEffect(() => { setIsReady(true); }, []);
 
-  const visibleWidgets: DashboardWidgetId[] =
-    currentUser?.dashboardConfig?.visibleWidgets ?? DEFAULT_DASHBOARD_WIDGETS;
+  const [visibleWidgets, setVisibleWidgets] = useState<DashboardWidgetId[]>(
+    () => currentUser?.dashboardConfig?.visibleWidgets ?? DEFAULT_DASHBOARD_WIDGETS
+  );
 
   const show = (id: DashboardWidgetId) => visibleWidgets.includes(id);
 
@@ -1153,7 +1154,10 @@ export function Dashboard({ onNavigate, onOpenDigest, onSelectClient }: Dashboar
       {buildADashOpen && (
         <BuildADash
           selected={visibleWidgets}
-          onChange={(widgets) => updateUser({ dashboardConfig: { visibleWidgets: widgets } })}
+          onChange={(widgets) => {
+            setVisibleWidgets(widgets);
+            updateUser({ preferences: { dashboardConfig: { visibleWidgets: widgets } } });
+          }}
           onClose={() => setBuildADashOpen(false)}
         />
       )}
