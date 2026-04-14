@@ -329,7 +329,7 @@ export type ClientFormData = Omit<Client, 'id' | 'createdAt' | 'services' | 'che
   contacts?: ClientContact[];
 };
 
-export type View = 'dashboard' | 'clients' | 'templates' | 'tasks' | 'board' | 'planner' | 'notes' | 'ai' | 'marketplace' | 'team' | 'automations' | 'hall-of-heroes' | 'reports' | 'integrations' | 'focus' | 'forms' | 'renewals' | 'studio';
+export type View = 'dashboard' | 'clients' | 'onboarding-clients' | 'templates' | 'tasks' | 'board' | 'planner' | 'notes' | 'ai' | 'marketplace' | 'team' | 'automations' | 'hall-of-heroes' | 'reports' | 'integrations' | 'focus' | 'forms' | 'renewals' | 'studio';
 
 // Calendar Integration
 export type CalendarProvider = 'google' | 'microsoft';
