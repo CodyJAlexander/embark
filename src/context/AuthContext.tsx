@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { StoredUser } from '../types';
+import type { StoredUser, DashboardWidgetConfig } from '../types';
 import { api, apiFetch, setToken, clearToken } from '../lib/api';
 import { migrateClientsFromLocalStorage } from '../utils/migrateLocalStorage';
 
@@ -19,11 +19,13 @@ interface ApiUser {
   avatarUrl?: string;
   characterClass?: StoredUser['characterClass'];
   onboardingComplete?: boolean;
-  preferences?: unknown;
+  preferences?: Record<string, unknown>;
+  teamId?: string;
   createdAt?: string;
 }
 
 function mapApiUser(apiUser: ApiUser): StoredUser {
+  const prefs = apiUser.preferences as { dashboardConfig?: DashboardWidgetConfig } | undefined;
   return {
     id: apiUser.id,
     username: apiUser.username,
@@ -33,6 +35,7 @@ function mapApiUser(apiUser: ApiUser): StoredUser {
     characterClass: apiUser.characterClass,
     onboardingComplete: apiUser.onboardingComplete ?? false,
     createdAt: apiUser.createdAt ?? new Date().toISOString(),
+    dashboardConfig: prefs?.dashboardConfig,
   };
 }
 
